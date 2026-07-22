@@ -2,8 +2,9 @@ import { getProjectById } from '@/lib/api';
 import ProjectForm from '@/components/ProjectForm';
 import { notFound } from 'next/navigation';
 
-export default async function EditProjectPage({ params }: { params: { id: string } }) {
-  const project = await getProjectById(params.id);
+export default async function EditProjectPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const project = await getProjectById(id);
 
   if (!project) {
     notFound();
