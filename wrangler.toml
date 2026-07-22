@@ -1,0 +1,6 @@
+name = "sayee-portfolio"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+# Environment variables are set in Cloudflare Pages dashboard
