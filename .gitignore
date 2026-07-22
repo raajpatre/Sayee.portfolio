@@ -34,3 +34,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# F-14 FIX: schema.sql excluded — contains full DB schema + RLS policy logic.
+# Store migrations privately or in Supabase dashboard only.
+schema.sql

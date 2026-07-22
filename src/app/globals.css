@@ -3,25 +3,164 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #fff8ef;
+  --foreground: #1f1b10;
+  --font-clash-display: 'Clash Display', sans-serif;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Plus Jakarta Sans', Arial, Helvetica, sans-serif;
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
+
+  /* Soft card shadow */
+  .shadow-level-2 {
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.06);
+  }
+  .shadow-subtle {
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.04);
+  }
+
+  /* Sidebar dot-grid texture */
+  .sidebar-dot-grid {
+    background-color: #1a1a1a;
+    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
 }
+
+/* ─── Toggle Switch ────────────────────────────────────────────── */
+.toggle-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: white;
+  border: 4px solid #d1d5db;
+  position: absolute;
+  top: 0;
+  left: 0;
+  cursor: pointer;
+  transition: left 0.2s ease, border-color 0.2s ease;
+  z-index: 10;
+}
+
+.toggle-checkbox:checked {
+  left: 20px;
+  border-color: #FFD600;
+}
+
+.toggle-label {
+  display: block;
+  width: 40px;
+  height: 20px;
+  border-radius: 9999px;
+  background-color: #d1d5db;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.toggle-checkbox:checked + .toggle-label,
+.toggle-checkbox:checked ~ .toggle-label {
+  background-color: #FFD600;
+}
+
+/* Wrapper pattern for toggles */
+.toggle-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.toggle-wrapper input[type="checkbox"] {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: #d1d5db;
+  border-radius: 9999px;
+  transition: background-color 0.2s ease;
+}
+
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  left: 3px;
+  top: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.toggle-wrapper input:checked + .toggle-slider {
+  background-color: #FFD600;
+}
+
+.toggle-wrapper input:checked + .toggle-slider::before {
+  transform: translateX(20px);
+}
+
+/* ─── Scrollbar Styling ─────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+/* ─── Carousel & 3D Card Utilities (F-13 FIX) ──────────────────── */
+/* These were previously injected via dangerouslySetInnerHTML in     */
+/* ProjectsCarousel and ServicesCarousel. Moved to global CSS to     */
+/* eliminate the unsafe HTML injection pattern entirely.             */
+.hide-scrollbars::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbars {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.perspective-800 {
+  perspective: 800px;
+}
+.transform-style-3d {
+  transform-style: preserve-3d;
+}
+.backface-hidden {
+  backface-visibility: hidden;
+}
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+@media (min-width: 768px) {
+  .perspective-800:hover .hover-flip {
+    transform: rotateY(180deg) !important;
+  }
+}
+
+

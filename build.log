@@ -1,0 +1,44 @@
+
+> sayee-portfolio@0.1.0 build
+> next build
+
+  ▲ Next.js 14.2.35
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+Failed to compile.
+
+./src/app/projects/page.tsx
+Error: 
+  [31mx[0m Expression expected
+    ,-[[36;1;4m/Users/raaj.dev/Documents/AntiGravity/Sayee's Portfolio/src/app/projects/page.tsx[0m:6:1]
+ [2m 6[0m |   const projects = await getProjects();
+ [2m 7[0m | 
+ [2m 8[0m |   return (
+ [2m 9[0m |     <>
+    : [31;1m     ^[0m
+ [2m10[0m |       {/* TopNavBar */}
+ [2m11[0m |       <nav className="bg-background dark:bg-surface border-b-2 border-on-surface dark:border-outline full-width top-0 sticky z-50">
+ [2m12[0m |         <div className="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-4 max-w-container-max mx-auto">
+    `----
+
+  [31mx[0m Expected ',', got '< (jsx tag start)'
+    ,-[[36;1;4m/Users/raaj.dev/Documents/AntiGravity/Sayee's Portfolio/src/app/projects/page.tsx[0m:8:1]
+ [2m 8[0m |   return (
+ [2m 9[0m |     <>
+ [2m10[0m |       {/* TopNavBar */}
+ [2m11[0m |       <nav className="bg-background dark:bg-surface border-b-2 border-on-surface dark:border-outline full-width top-0 sticky z-50">
+    : [31;1m      ^[0m
+ [2m12[0m |         <div className="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-4 max-w-container-max mx-auto">
+ [2m13[0m |           {/* Brand */}
+ [2m14[0m |           <a
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/projects/page.tsx
+
+
+> Build failed because of webpack errors

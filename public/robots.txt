@@ -1,0 +1,9 @@
+# F-11 FIX: Prevent search engines from indexing the admin portal.
+# This stops /admin and /admin/login from appearing in Google results
+# or being archived by crawlers.
+
+User-agent: *
+Disallow: /admin/
+
+# Allow all other public routes
+Allow: /
