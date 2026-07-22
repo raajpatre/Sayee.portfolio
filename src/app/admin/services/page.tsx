@@ -3,7 +3,7 @@ import ServicesManager from "@/components/ServicesManager";
 import { createClient } from "@/utils/supabase/server";
 
 export default async function ServicesPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: services, error } = await supabase
     .from("services")

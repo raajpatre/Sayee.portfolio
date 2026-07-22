@@ -4,7 +4,7 @@ import { createClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
 
 async function checkAuth() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error || !user) {
     // F-09 FIX: Log internal detail server-side only; never expose to client.

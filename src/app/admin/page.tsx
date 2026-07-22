@@ -4,7 +4,7 @@ import AdminTopBar from "@/components/AdminTopBar";
 import AvailabilityToggle from "@/components/AvailabilityToggle";
 
 export default async function AdminDashboardPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   // Fetch basic stats
   const { count: projectCount } = await supabase

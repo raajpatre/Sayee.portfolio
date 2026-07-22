@@ -4,7 +4,7 @@ import ProfileForm from "@/components/ProfileForm";
 import AvailabilityToggle from "@/components/AvailabilityToggle";
 
 export default async function Page() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: profile } = await supabase.from('profile').select('*').limit(1).single();
 
   return (

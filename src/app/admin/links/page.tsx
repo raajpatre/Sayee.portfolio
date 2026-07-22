@@ -3,7 +3,7 @@ import LinksManager from "@/components/LinksManager";
 import { createClient } from "@/utils/supabase/server";
 
 export default async function LinksPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   // Make sure table is "links" and columns match the expected structure
   const { data: links, error } = await supabase

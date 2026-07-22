@@ -3,7 +3,7 @@ import TestimonialsManager from "@/components/TestimonialsManager";
 import { createClient } from "@/utils/supabase/server";
 
 export default async function TestimonialsPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: testimonials, error } = await supabase
     .from("testimonials")

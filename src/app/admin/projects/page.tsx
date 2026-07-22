@@ -4,7 +4,7 @@ import ProjectsManager from "@/components/ProjectsManager";
 import { createClient } from "@/utils/supabase/server";
 
 export default async function Page() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: projects, error } = await supabase
     .from("projects")

@@ -28,7 +28,7 @@ function detectMimeFromBytes(bytes: Uint8Array): string | null {
 
 export async function uploadImage(formData: FormData) {
   // 1. Verify user — F-09/F-16: throw generic message; never leak Supabase error details.
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   if (authError || !user) {
     // Log internally but never expose Supabase error message to the client.

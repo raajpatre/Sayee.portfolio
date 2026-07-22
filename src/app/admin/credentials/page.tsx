@@ -3,7 +3,7 @@ import CredentialsManager from "@/components/CredentialsManager";
 import { createClient } from "@/utils/supabase/server";
 
 export default async function CredentialsPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: credentials, error } = await supabase
     .from("credentials")
