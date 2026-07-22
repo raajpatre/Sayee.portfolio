@@ -47,7 +47,7 @@ export default async function Home() {
 
       {/* SECTION 1 - HERO */}
       <section
-        className="sticky top-[68px] md:top-[84px] z-0 relative w-full min-h-[90svh] md:min-h-[auto] md:aspect-[2/1] overflow-hidden px-margin-mobile md:px-margin-desktop border-b-2 border-brand-black flex items-center justify-center bg-cover bg-center bg-no-repeat"
+        className="relative md:sticky md:top-[84px] z-0 w-full min-h-[90svh] md:min-h-[auto] md:aspect-[2/1] overflow-hidden px-margin-mobile md:px-margin-desktop border-b-2 border-brand-black flex items-center justify-center bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: "url('/sayee-home-bg.png')" }}
       >
         {/* Decorative Elements */}
@@ -185,7 +185,7 @@ export default async function Home() {
       </section>
       {/* SECTION 2 - ABOUT */}
       <section
-        className="sticky top-[68px] md:top-[84px] z-[1] pt-6 pb-16 md:py-stack-lg border-t-4 border-b-2 border-brand-black overflow-hidden relative bg-cover bg-[15%_center] md:bg-center bg-no-repeat"
+        className="relative md:sticky md:top-[84px] z-[1] pt-6 pb-16 md:py-stack-lg border-t-4 border-b-2 border-brand-black overflow-hidden bg-cover bg-[15%_center] md:bg-center bg-no-repeat"
         style={{ backgroundImage: "url('/sayee-about-bg.png')" }}
         id="about"
       >
@@ -272,7 +272,7 @@ export default async function Home() {
       </section>
       {/* SECTION 3 - FEATURED WORK */}
       <section
-        className="sticky top-[68px] md:top-[84px] z-[2] w-full bg-cover bg-center bg-no-repeat border-t-4 border-b-2 border-brand-black relative pb-16"
+        className="relative md:sticky md:top-[84px] z-[2] w-full bg-cover bg-center bg-no-repeat border-t-4 border-b-2 border-brand-black pb-16"
         style={{ backgroundImage: "url('/sayee-projects-bg.png')" }}
         id="work"
       >
@@ -283,7 +283,7 @@ export default async function Home() {
       </section>
       {/* SECTION 4 - SERVICES */}
       <section
-        className="sticky top-[68px] md:top-[84px] z-[3] w-full bg-cover bg-center bg-no-repeat border-t-4 border-b-2 border-brand-black relative pb-28 pt-12"
+        className="relative md:sticky md:top-[84px] z-[3] w-full bg-cover bg-center bg-no-repeat border-t-4 border-b-2 border-brand-black relative pb-28 pt-12"
         style={{ backgroundImage: "url('/sayee-services-bg.png')" }}
         id="services"
       >
@@ -307,7 +307,7 @@ export default async function Home() {
 
       {/* SECTION 6 - CONTACT CTA */}
       <section
-        className="sticky top-[68px] md:top-[84px] z-[5] w-full min-h-[90svh] md:min-h-0 md:aspect-[1672/941] bg-cover bg-center bg-no-repeat border-t-4 border-b-2 border-brand-black text-center relative overflow-hidden flex flex-col justify-center"
+        className="relative md:sticky md:top-[84px] z-[5] w-full min-h-[90svh] md:min-h-0 md:aspect-[1672/941] bg-cover bg-center bg-no-repeat border-t-4 border-b-2 border-brand-black text-center overflow-hidden flex flex-col justify-center"
         style={{ backgroundImage: "url('/sayee-connect-bg.JPG')" }}
         id="contact"
       >
