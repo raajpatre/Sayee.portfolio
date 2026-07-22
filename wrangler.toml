@@ -2,5 +2,9 @@ name = "sayee-portfolio"
 compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
 
-[vars]
-# Environment variables are set in Cloudflare Pages dashboard
+# OpenNext generates the worker at this path
+main = ".open-next/worker.js"
+
+[assets]
+directory = ".open-next/assets"
+binding = "ASSETS"
