@@ -161,9 +161,8 @@ export default function ProfileForm({ initialProfile }: { initialProfile: any })
       {/* Main Tab Content Card */}
       <div className="bg-white rounded-xl border border-[#EBEBEB] p-6 shadow-subtle min-h-[350px]">
         {/* Tab 1: Identity & Hero */}
-        {activeTab === 'identity' && (
-          <div className="space-y-6">
-            <h3 className="text-[16px] font-bold text-[#1A1A1A]">Identity &amp; Hero Settings</h3>
+        <div className={activeTab === 'identity' ? 'space-y-6 block' : 'space-y-6 hidden'}>
+          <h3 className="text-[16px] font-bold text-[#1A1A1A]">Identity &amp; Hero Settings</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-bold text-[#6B7280] uppercase tracking-wider">Display Name</label>
@@ -266,12 +265,11 @@ export default function ProfileForm({ initialProfile }: { initialProfile: any })
             </div>
             {renderSaveButton('Save Identity & Hero')}
           </div>
-        )}
+        </div>
 
         {/* Tab 2: Media & Gallery */}
-        {activeTab === 'media' && (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center border-b border-[#F3F4F6] pb-4">
+        <div className={activeTab === 'media' ? 'space-y-6 block' : 'space-y-6 hidden'}>
+          <div className="flex justify-between items-center border-b border-[#F3F4F6] pb-4">
               <div>
                 <h3 className="text-[16px] font-bold text-[#1A1A1A]">Media Gallery Collage</h3>
                 <p className="text-xs text-[#6B7280] mt-0.5">Manage the scrapbook photos shown in your About scrapbook section.</p>
@@ -343,12 +341,11 @@ export default function ProfileForm({ initialProfile }: { initialProfile: any })
             />
             {renderSaveButton('Save Media Gallery')}
           </div>
-        )}
+        </div>
 
         {/* Tab 3: Written Bios */}
-        {activeTab === 'bios' && (
-          <div className="space-y-5">
-            <h3 className="text-[16px] font-bold text-[#1A1A1A]">Written Story &amp; Tickers</h3>
+        <div className={activeTab === 'bios' ? 'space-y-5 block' : 'space-y-5 hidden'}>
+          <h3 className="text-[16px] font-bold text-[#1A1A1A]">Written Story &amp; Tickers</h3>
             
             {/* Dynamic Scrolling Marquee Tickers */}
             <div className="flex flex-col gap-2 pt-1">
@@ -417,7 +414,7 @@ export default function ProfileForm({ initialProfile }: { initialProfile: any })
             <input type="hidden" name="about_description" value={initialProfile?.about_description || ''} />
             {renderSaveButton('Save Written Bios')}
           </div>
-        )}
+        </div>
 
         {/* Hidden inputs to preserve Background Details database values */}
         <input type="hidden" name="currently" value={initialProfile?.currently || ''} />
@@ -428,9 +425,8 @@ export default function ProfileForm({ initialProfile }: { initialProfile: any })
         <input type="hidden" name="currently_based_in" value={initialProfile?.currently_based_in || ''} />
 
         {/* Tab 5: Socials & Resume */}
-        {activeTab === 'socials' && (
-          <div className="space-y-6">
-            <h3 className="text-[16px] font-bold text-[#1A1A1A]">Social Presence &amp; Resume Settings</h3>
+        <div className={activeTab === 'socials' ? 'space-y-6 block' : 'space-y-6 hidden'}>
+          <h3 className="text-[16px] font-bold text-[#1A1A1A]">Social Presence &amp; Resume Settings</h3>
             
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="flex flex-col gap-1.5">
@@ -477,7 +473,7 @@ export default function ProfileForm({ initialProfile }: { initialProfile: any })
             </div>
             {renderSaveButton('Save Socials & Resume')}
           </div>
-        )}
+        </div>
       </div>
     </form>
   );
