@@ -264,7 +264,6 @@ export default function ProfileForm({ initialProfile }: { initialProfile: any })
               />
             </div>
             {renderSaveButton('Save Identity & Hero')}
-          </div>
         </div>
 
         {/* Tab 2: Media & Gallery */}
@@ -340,7 +339,6 @@ export default function ProfileForm({ initialProfile }: { initialProfile: any })
               }}
             />
             {renderSaveButton('Save Media Gallery')}
-          </div>
         </div>
 
         {/* Tab 3: Written Bios */}
@@ -413,7 +411,6 @@ export default function ProfileForm({ initialProfile }: { initialProfile: any })
             {/* Preserve Detailed About Description value without displaying it */}
             <input type="hidden" name="about_description" value={initialProfile?.about_description || ''} />
             {renderSaveButton('Save Written Bios')}
-          </div>
         </div>
 
         {/* Hidden inputs to preserve Background Details database values */}
@@ -472,7 +469,6 @@ export default function ProfileForm({ initialProfile }: { initialProfile: any })
               />
             </div>
             {renderSaveButton('Save Socials & Resume')}
-          </div>
         </div>
       </div>
     </form>
