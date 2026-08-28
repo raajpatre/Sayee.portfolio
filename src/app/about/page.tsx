@@ -83,9 +83,9 @@ export default async function Page() {
                       </div>
 
                       <div className="w-full aspect-square bg-gray-200 border-2 border-brand-black mb-3 relative overflow-hidden">
-                        {entry.avatar_url ? (
+                        {entry.author_image ? (
                           <img 
-                            src={entry.avatar_url} 
+                            src={entry.author_image} 
                             alt={entry.author_name}
                             className="absolute inset-0 w-full h-full object-cover grayscale-[20%] contrast-125"
                           />

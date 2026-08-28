@@ -209,12 +209,12 @@ export async function addTestimonial(formData: FormData) {
   
   const author_name = formData.get('author_name') as string;
   const content = formData.get('content') as string;
-  const avatar_url = formData.get('avatar_url') as string;
+  const author_image = formData.get('author_image') as string;
 
   const { error } = await supabase.from('testimonials').insert({
     author_name,
     content,
-    avatar_url
+    author_image
   });
 
   if (error) throw new Error(error.message);
@@ -230,12 +230,12 @@ export async function updateTestimonial(formData: FormData) {
   const id = formData.get('id') as string;
   const author_name = formData.get('author_name') as string;
   const content = formData.get('content') as string;
-  const avatar_url = formData.get('avatar_url') as string;
+  const author_image = formData.get('author_image') as string;
 
   const { error } = await supabase.from('testimonials').update({
     author_name,
     content,
-    avatar_url
+    author_image
   }).eq('id', id);
 
   if (error) throw new Error(error.message);

@@ -8,7 +8,7 @@ type Testimonial = {
   id: string;
   author_name: string;
   content: string;
-  avatar_url?: string | null;
+  author_image?: string | null;
   is_published?: boolean;
 };
 
@@ -30,7 +30,7 @@ export default function TestimonialsManager({ initialTestimonials }: { initialTe
   const formRef = useRef<HTMLFormElement>(null);
 
   function openAdd() { setError(''); setPreview(''); setCaptionValue(''); setTitleValue(''); setModal({ mode: 'add' }); }
-  function openEdit(t: Testimonial) { setError(''); setPreview(t.avatar_url || ''); setCaptionValue(t.content || ''); setTitleValue(t.author_name || ''); setModal({ mode: 'edit', testimonial: t }); }
+  function openEdit(t: Testimonial) { setError(''); setPreview(t.author_image || ''); setCaptionValue(t.content || ''); setTitleValue(t.author_name || ''); setModal({ mode: 'edit', testimonial: t }); }
   function closeModal() { setModal({ mode: 'closed' }); setError(''); setPreview(''); setCaptionValue(''); setTitleValue(''); }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -46,13 +46,13 @@ export default function TestimonialsManager({ initialTestimonials }: { initialTe
 
     startTransition(async () => {
       try {
-        let avatar_url = modal.mode === 'edit' ? (modal.testimonial.avatar_url || '') : '';
+        let author_image = modal.mode === 'edit' ? (modal.testimonial.author_image || '') : '';
         if (file && file.size > 0) {
           const uploadFormData = new FormData();
           uploadFormData.append('file', file);
-          avatar_url = await uploadImage(uploadFormData);
+          author_image = await uploadImage(uploadFormData);
         }
-        formData.set('avatar_url', avatar_url);
+        formData.set('author_image', author_image);
 
         if (modal.mode === 'add') {
           await addTestimonial(formData);
@@ -145,9 +145,9 @@ export default function TestimonialsManager({ initialTestimonials }: { initialTe
 
               {/* Identity Row: Avatar + Title */}
               <div className="flex items-center gap-3 px-4 pb-3">
-                {t.avatar_url ? (
+                {t.author_image ? (
                   <img
-                    src={t.avatar_url}
+                    src={t.author_image}
                     alt={t.author_name}
                     className="w-11 h-11 rounded-lg object-cover flex-shrink-0 border border-gray-100"
                   />
