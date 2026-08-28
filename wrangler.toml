@@ -5,6 +5,13 @@ compatibility_flags = ["nodejs_compat"]
 # OpenNext generates the worker at this path
 main = ".open-next/worker.js"
 
+[vars]
+NEXT_PUBLIC_SUPABASE_URL = "https://puinldfooazzciuenizu.supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1aW5sZGZvb2F6emNpdWVuaXp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzMjY5NDAsImV4cCI6MjA5ODkwMjk0MH0._s3_xTlox2tb-5slCSALz-dIhCVVw4dwoXU_k0aQ9Uw"
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME = "qustohas"
+CLOUDINARY_API_KEY = "338924733122726"
+CLOUDINARY_API_SECRET = "BzK-M3i5zHYrdl11SO5_e7NYuz8"
+
 [assets]
 directory = ".open-next/assets"
 binding = "ASSETS"
