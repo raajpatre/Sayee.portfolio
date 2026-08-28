@@ -4,6 +4,10 @@ const nextConfig = {
   // TypeScript and ESLint errors now correctly fail the build, preventing
   // silent security regressions from shipping to production.
 
+  serverActions: {
+    bodySizeLimit: '10mb',
+  },
+
   // F-03 FIX: Security headers applied to every response.
   async headers() {
     return [
