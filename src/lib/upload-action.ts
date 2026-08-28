@@ -56,11 +56,20 @@ export async function uploadImage(formData: FormData) {
 
   // 5. Upload to Cloudinary using verified MIME type and restrict to images only.
   const base64Image = `data:${detectedMime};base64,${buffer.toString('base64')}`;
-  const result = await cloudinary.uploader.upload(base64Image, {
-    folder: 'portfolio',
-    resource_type: 'image', // F-02: was 'auto' — now locked to images only
-    allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'gif'],
-  });
+  let result: any;
+  try {
+    result = await cloudinary.uploader.upload(base64Image, {
+      folder: 'portfolio',
+      resource_type: 'image', // F-02: was 'auto' — now locked to images only
+      allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'gif'],
+    });
+  } catch (cloudinaryErr: any) {
+    // Cloudinary SDK throws custom objects that Next.js can't serialize.
+    // Re-throw as a plain Error so the client receives the real message.
+    const msg = cloudinaryErr?.message || cloudinaryErr?.error?.message || 'Image upload failed. Please check your Cloudinary credentials in Cloudflare.';
+    console.error('[uploadImage] Cloudinary error:', msg);
+    throw new Error(msg);
+  }
 
   return result.secure_url;
 }
