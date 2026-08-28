@@ -1,6 +1,5 @@
 'use server'
 
-import cloudinary from '@/utils/cloudinary';
 import { createClient } from '@/utils/supabase/server';
 
 // F-02: Allowed MIME types and their magic-byte signatures.
@@ -26,12 +25,25 @@ function detectMimeFromBytes(bytes: Uint8Array): string | null {
   return null;
 }
 
+/**
+ * Generate SHA-1 signature for Cloudinary upload using Web Crypto API
+ * (compatible with Cloudflare Workers, unlike Node.js crypto).
+ */
+async function generateSignature(params: Record<string, string>, apiSecret: string): Promise<string> {
+  const sortedKeys = Object.keys(params).sort();
+  const toSign = sortedKeys.map(k => `${k}=${params[k]}`).join('&') + apiSecret;
+  const encoder = new TextEncoder();
+  const data = encoder.encode(toSign);
+  const hashBuffer = await crypto.subtle.digest('SHA-1', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
 export async function uploadImage(formData: FormData): Promise<{ url: string } | { error: string }> {
   // 1. Verify user — F-09/F-16: throw generic message; never leak Supabase error details.
   const supabase = await createClient();
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   if (authError || !user) {
-    // Log internally but never expose Supabase error message to the client.
     console.error('[uploadImage] Auth error:', authError?.message);
     return { error: 'Unauthorized' };
   }
@@ -54,20 +66,51 @@ export async function uploadImage(formData: FormData): Promise<{ url: string } |
     return { error: 'Unsupported file type. Only JPEG, PNG, WebP, and GIF images are allowed.' };
   }
 
-  // 5. Upload to Cloudinary using verified MIME type and restrict to images only.
-  const base64Image = `data:${detectedMime};base64,${buffer.toString('base64')}`;
-  let result: any;
-  try {
-    result = await cloudinary.uploader.upload(base64Image, {
-      folder: 'portfolio',
-      resource_type: 'image', // F-02: was 'auto' — now locked to images only
-      allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'gif'],
-    });
-  } catch (cloudinaryErr: any) {
-    const msg = cloudinaryErr?.message || cloudinaryErr?.error?.message || 'Image upload failed. Please check your Cloudinary credentials in Cloudflare.';
-    console.error('[uploadImage] Cloudinary error:', msg);
-    return { error: msg };
+  // 5. Upload to Cloudinary using fetch API (compatible with Cloudflare Workers).
+  //    The Cloudinary Node.js SDK uses https.request which is NOT available in Workers.
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+  const apiKey = process.env.CLOUDINARY_API_KEY || process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY;
+  const apiSecret = process.env.CLOUDINARY_API_SECRET;
+
+  if (!cloudName || !apiKey || !apiSecret) {
+    console.error('[uploadImage] Missing Cloudinary env vars:', { cloudName: !!cloudName, apiKey: !!apiKey, apiSecret: !!apiSecret });
+    return { error: 'Image upload is not configured. Missing Cloudinary credentials.' };
   }
 
-  return { url: result.secure_url };
+  const base64Image = `data:${detectedMime};base64,${buffer.toString('base64')}`;
+  const timestamp = Math.floor(Date.now() / 1000).toString();
+
+  const signatureParams: Record<string, string> = {
+    folder: 'portfolio',
+    timestamp,
+  };
+
+  try {
+    const signature = await generateSignature(signatureParams, apiSecret);
+
+    const uploadForm = new FormData();
+    uploadForm.append('file', base64Image);
+    uploadForm.append('folder', 'portfolio');
+    uploadForm.append('timestamp', timestamp);
+    uploadForm.append('api_key', apiKey);
+    uploadForm.append('signature', signature);
+
+    const response = await fetch(
+      `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+      { method: 'POST', body: uploadForm }
+    );
+
+    const result = await response.json() as any;
+
+    if (!response.ok || result.error) {
+      const msg = result?.error?.message || `Upload failed (HTTP ${response.status})`;
+      console.error('[uploadImage] Cloudinary API error:', msg);
+      return { error: msg };
+    }
+
+    return { url: result.secure_url };
+  } catch (err: any) {
+    console.error('[uploadImage] Fetch error:', err?.message);
+    return { error: err?.message || 'Image upload failed unexpectedly.' };
+  }
 }
