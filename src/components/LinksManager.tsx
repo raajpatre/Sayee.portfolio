@@ -42,14 +42,16 @@ export default function LinksManager({ initialLinks }: { initialLinks: BlogLink[
     startTransition(async () => {
       try {
         if (modal.mode === 'add') {
-          await addLink(formData);
+          const result = await addLink(formData);
+          if (result && 'error' in result) { setError(result.error); return; }
         } else if (modal.mode === 'edit') {
-          await updateLink(formData);
+          const result = await updateLink(formData);
+          if (result && 'error' in result) { setError(result.error); return; }
         }
         closeModal();
         window.location.reload();
       } catch (err: any) {
-        setError(err.message);
+        setError(err?.message || 'An unexpected error occurred');
       }
     });
   }
@@ -58,10 +60,14 @@ export default function LinksManager({ initialLinks }: { initialLinks: BlogLink[
     if (!confirm('Delete this article link? This cannot be undone.')) return;
     startTransition(async () => {
       try {
-        await deleteLink(id);
+        const result = await deleteLink(id);
+        if (result && 'error' in result) {
+          alert(result.error);
+          return;
+        }
         setLinks((prev) => prev.filter((l) => l.id !== id));
       } catch (err: any) {
-        alert(err.message);
+        alert(err?.message || 'An unexpected error occurred');
       }
     });
   }

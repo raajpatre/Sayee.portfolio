@@ -81,10 +81,14 @@ export default function TestimonialsManager({ initialTestimonials }: { initialTe
     if (!confirm('Delete this entry? This cannot be undone.')) return;
     startTransition(async () => {
       try {
-        await deleteTestimonial(id);
+        const result = await deleteTestimonial(id);
+        if (result && 'error' in result) {
+          alert(result.error);
+          return;
+        }
         setTestimonials((prev) => prev.filter((t) => t.id !== id));
       } catch (err: any) {
-        alert(err.message);
+        alert(err?.message || 'An unexpected error occurred');
       }
     });
   }

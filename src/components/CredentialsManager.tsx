@@ -68,14 +68,16 @@ export default function CredentialsManager({ initialCredentials }: { initialCred
         formData.set('image_url', image_url);
 
         if (modal.mode === 'add') {
-          await addCredential(formData);
+          const result = await addCredential(formData);
+          if (result && 'error' in result) { setError(result.error); return; }
         } else if (modal.mode === 'edit') {
-          await updateCredential(formData);
+          const result = await updateCredential(formData);
+          if (result && 'error' in result) { setError(result.error); return; }
         }
         closeModal();
         window.location.reload();
       } catch (err: any) {
-        setError(err.message);
+        setError(err?.message || 'An unexpected error occurred');
       }
     });
   }

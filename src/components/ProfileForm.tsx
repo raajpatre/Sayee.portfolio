@@ -86,11 +86,15 @@ export default function ProfileForm({ initialProfile }: { initialProfile: any })
         // preserve the current avatar/availability status in this form since they are handled elsewhere or hidden
         formData.append('availability_status', initialProfile?.availability_status || 'Open for Work');
         formData.append('avatar', initialProfile?.avatar || '');
-        await updateProfile(formData);
+        const result = await updateProfile(formData);
+        if (result && 'error' in result) {
+          setErrorMsg(result.error);
+          return;
+        }
         setSuccessMsg('Profile updated successfully!');
         setTimeout(() => setSuccessMsg(''), 3000);
       } catch (err: any) {
-        setErrorMsg(err.message);
+        setErrorMsg(err?.message || 'An unexpected error occurred');
       }
     });
   }

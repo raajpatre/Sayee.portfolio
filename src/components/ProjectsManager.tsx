@@ -51,10 +51,14 @@ export default function ProjectsManager({ initialProjects }: { initialProjects: 
     if (!confirm('Are you sure you want to delete this project?')) return;
     startTransition(async () => {
       try {
-        await deleteProject(id);
+        const result = await deleteProject(id);
+        if (result && 'error' in result) {
+          alert(result.error);
+          return;
+        }
         setProjects(prev => prev.filter(p => p.id !== id));
       } catch (err: any) {
-        alert(err.message);
+        alert(err?.message || 'An unexpected error occurred');
       }
     });
   }

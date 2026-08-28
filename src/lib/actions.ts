@@ -3,6 +3,8 @@
 import { createClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
 
+type ActionResult = { error: string } | null;
+
 async function checkAuth() {
   const supabase = await createClient();
   const { data: { user }, error } = await supabase.auth.getUser();
@@ -53,158 +55,163 @@ async function logActivity(supabase: any, actionText: string, icon: string = 'in
   }
 }
 
-export async function addProject(formData: FormData) {
-  const supabase = await checkAuth();
-  
-  const title = formData.get('title') as string;
-  const category = formData.get('category') as string;
-  const slug = formData.get('slug') as string;
-  const description = formData.get('description') as string;
-  const content = formData.get('content') as string;
-  const cover_image = formData.get('cover_image') as string;
-  const aspect_ratio = (formData.get('aspect_ratio') as string) || '1:1';
-  const client_name = formData.get('client_name') as string;
+export async function addProject(formData: FormData): Promise<ActionResult> {
+  try {
+    const supabase = await checkAuth();
+    
+    const title = formData.get('title') as string;
+    const category = formData.get('category') as string;
+    const slug = formData.get('slug') as string;
+    const description = formData.get('description') as string;
+    const content = formData.get('content') as string;
+    const cover_image = formData.get('cover_image') as string;
+    const aspect_ratio = (formData.get('aspect_ratio') as string) || '1:1';
+    const client_name = formData.get('client_name') as string;
 
-  const { error } = await supabase.from('projects').insert({
-    title,
-    category,
-    slug,
-    description,
-    content,
-    cover_image,
-    aspect_ratio,
-    client_name
-  });
+    const { error } = await supabase.from('projects').insert({
+      title, category, slug, description, content, cover_image, aspect_ratio, client_name
+    });
 
-  if (error) {
-    if (error.message.includes('schema cache') || error.message.includes('column') || error.code === 'PGRST204') {
-      throw new Error('Database column "client_name" is missing. Please run this SQL in your Supabase Dashboard: ALTER TABLE public.projects ADD COLUMN client_name text;');
+    if (error) {
+      if (error.message.includes('schema cache') || error.message.includes('column') || error.code === 'PGRST204') {
+        return { error: 'Database column "client_name" is missing. Please run: ALTER TABLE public.projects ADD COLUMN client_name text;' };
+      }
+      return { error: error.message };
     }
-    throw new Error(error.message);
+    await logActivity(supabase, `Added project: ${title}`, 'folder_copy');
+    
+    revalidatePath('/');
+    revalidatePath('/projects');
+    revalidatePath('/admin/projects');
+    return null;
+  } catch (err: any) {
+    return { error: err?.message || 'Failed to add project' };
   }
-  await logActivity(supabase, `Added project: ${title}`, 'folder_copy');
-  
-  revalidatePath('/');
-  revalidatePath('/projects');
-  revalidatePath('/admin/projects');
 }
 
-export async function updateProject(formData: FormData) {
-  const supabase = await checkAuth();
-  
-  const id = formData.get('id') as string;
-  const title = formData.get('title') as string;
-  const category = formData.get('category') as string;
-  const slug = formData.get('slug') as string;
-  const description = formData.get('description') as string;
-  const cover_image = formData.get('cover_image') as string;
-  const aspect_ratio = (formData.get('aspect_ratio') as string) || '1:1';
-  const client_name = formData.get('client_name') as string;
+export async function updateProject(formData: FormData): Promise<ActionResult> {
+  try {
+    const supabase = await checkAuth();
+    
+    const id = formData.get('id') as string;
+    const title = formData.get('title') as string;
+    const category = formData.get('category') as string;
+    const slug = formData.get('slug') as string;
+    const description = formData.get('description') as string;
+    const cover_image = formData.get('cover_image') as string;
+    const aspect_ratio = (formData.get('aspect_ratio') as string) || '1:1';
+    const client_name = formData.get('client_name') as string;
 
-  const { error } = await supabase.from('projects').update({
-    title,
-    category,
-    slug,
-    description,
-    cover_image,
-    aspect_ratio,
-    client_name
-  }).eq('id', id);
+    const { error } = await supabase.from('projects').update({
+      title, category, slug, description, cover_image, aspect_ratio, client_name
+    }).eq('id', id);
 
-  if (error) {
-    if (error.message.includes('schema cache') || error.message.includes('column') || error.code === 'PGRST204') {
-      throw new Error('Database column "client_name" is missing. Please run this SQL in your Supabase Dashboard: ALTER TABLE public.projects ADD COLUMN client_name text;');
+    if (error) {
+      if (error.message.includes('schema cache') || error.message.includes('column') || error.code === 'PGRST204') {
+        return { error: 'Database column "client_name" is missing. Please run: ALTER TABLE public.projects ADD COLUMN client_name text;' };
+      }
+      return { error: error.message };
     }
-    throw new Error(error.message);
+    await logActivity(supabase, `Updated project: ${title}`, 'edit_document');
+
+    revalidatePath('/');
+    revalidatePath('/projects');
+    revalidatePath('/admin/projects');
+    return null;
+  } catch (err: any) {
+    return { error: err?.message || 'Failed to update project' };
   }
-  await logActivity(supabase, `Updated project: ${title}`, 'edit_document');
-
-  revalidatePath('/');
-  revalidatePath('/projects');
-  revalidatePath('/admin/projects');
 }
 
-export async function deleteProject(id: string) {
-  const supabase = await checkAuth();
-  
-  // Get title for logging
-  const { data: proj } = await supabase.from('projects').select('title').eq('id', id).single();
-  const title = proj?.title || 'Unknown Project';
+export async function deleteProject(id: string): Promise<ActionResult> {
+  try {
+    const supabase = await checkAuth();
+    const { data: proj } = await supabase.from('projects').select('title').eq('id', id).single();
+    const title = proj?.title || 'Unknown Project';
 
-  const { error } = await supabase.from('projects').delete().eq('id', id);
-  if (error) throw new Error(error.message);
-  await logActivity(supabase, `Removed project: ${title}`, 'delete');
+    const { error } = await supabase.from('projects').delete().eq('id', id);
+    if (error) return { error: error.message };
+    await logActivity(supabase, `Removed project: ${title}`, 'delete');
 
-  revalidatePath('/');
-  revalidatePath('/projects');
-  revalidatePath('/admin/projects');
+    revalidatePath('/');
+    revalidatePath('/projects');
+    revalidatePath('/admin/projects');
+    return null;
+  } catch (err: any) {
+    return { error: err?.message || 'Failed to delete project' };
+  }
 }
 
-export async function addService(formData: FormData) {
-  const supabase = await checkAuth();
-  
-  const title = formData.get('title') as string;
-  const description = formData.get('description') as string;
-  const icon = formData.get('icon') as string;
-  const card_color = (formData.get('card_color') as string) || 'bg-white';
-  const text_color = (formData.get('text_color') as string) || 'text-brand-black';
+export async function addService(formData: FormData): Promise<ActionResult> {
+  try {
+    const supabase = await checkAuth();
+    
+    const title = formData.get('title') as string;
+    const description = formData.get('description') as string;
+    const icon = formData.get('icon') as string;
+    const card_color = (formData.get('card_color') as string) || 'bg-white';
+    const text_color = (formData.get('text_color') as string) || 'text-brand-black';
 
-  const { error } = await supabase.from('services').insert({
-    title,
-    description,
-    icon,
-    card_color,
-    text_color
-  });
+    const { error } = await supabase.from('services').insert({
+      title, description, icon, card_color, text_color
+    });
 
-  if (error) throw new Error(error.message);
-  await logActivity(supabase, `Added service: ${title}`, 'build');
+    if (error) return { error: error.message };
+    await logActivity(supabase, `Added service: ${title}`, 'build');
 
-  revalidatePath('/');
-  revalidatePath('/admin/services');
+    revalidatePath('/');
+    revalidatePath('/admin/services');
+    return null;
+  } catch (err: any) {
+    return { error: err?.message || 'Failed to add service' };
+  }
 }
 
-export async function updateService(formData: FormData) {
-  const supabase = await checkAuth();
-  
-  const id = formData.get('id') as string;
-  const title = formData.get('title') as string;
-  const description = formData.get('description') as string;
-  const icon = formData.get('icon') as string;
-  const card_color = (formData.get('card_color') as string) || 'bg-white';
-  const text_color = (formData.get('text_color') as string) || 'text-brand-black';
+export async function updateService(formData: FormData): Promise<ActionResult> {
+  try {
+    const supabase = await checkAuth();
+    
+    const id = formData.get('id') as string;
+    const title = formData.get('title') as string;
+    const description = formData.get('description') as string;
+    const icon = formData.get('icon') as string;
+    const card_color = (formData.get('card_color') as string) || 'bg-white';
+    const text_color = (formData.get('text_color') as string) || 'text-brand-black';
 
-  const { error } = await supabase.from('services').update({
-    title,
-    description,
-    icon,
-    card_color,
-    text_color
-  }).eq('id', id);
+    const { error } = await supabase.from('services').update({
+      title, description, icon, card_color, text_color
+    }).eq('id', id);
 
-  if (error) throw new Error(error.message);
-  await logActivity(supabase, `Updated service: ${title}`, 'edit_document');
+    if (error) return { error: error.message };
+    await logActivity(supabase, `Updated service: ${title}`, 'edit_document');
 
-  revalidatePath('/');
-  revalidatePath('/admin/services');
+    revalidatePath('/');
+    revalidatePath('/admin/services');
+    return null;
+  } catch (err: any) {
+    return { error: err?.message || 'Failed to update service' };
+  }
 }
 
-export async function deleteService(id: string) {
-  const supabase = await checkAuth();
-  
-  // Get title for logging
-  const { data: s } = await supabase.from('services').select('title').eq('id', id).single();
-  const title = s?.title || 'Unknown Service';
+export async function deleteService(id: string): Promise<ActionResult> {
+  try {
+    const supabase = await checkAuth();
+    const { data: s } = await supabase.from('services').select('title').eq('id', id).single();
+    const title = s?.title || 'Unknown Service';
 
-  const { error } = await supabase.from('services').delete().eq('id', id);
-  if (error) throw new Error(error.message);
-  await logActivity(supabase, `Removed service: ${title}`, 'delete');
+    const { error } = await supabase.from('services').delete().eq('id', id);
+    if (error) return { error: error.message };
+    await logActivity(supabase, `Removed service: ${title}`, 'delete');
 
-  revalidatePath('/');
-  revalidatePath('/admin/services');
+    revalidatePath('/');
+    revalidatePath('/admin/services');
+    return null;
+  } catch (err: any) {
+    return { error: err?.message || 'Failed to delete service' };
+  }
 }
 
-export async function addTestimonial(formData: FormData): Promise<{ error: string } | null> {
+export async function addTestimonial(formData: FormData): Promise<ActionResult> {
   try {
     const supabase = await checkAuth();
     
@@ -213,9 +220,7 @@ export async function addTestimonial(formData: FormData): Promise<{ error: strin
     const author_image = formData.get('author_image') as string;
 
     const { error } = await supabase.from('testimonials').insert({
-      author_name,
-      content,
-      author_image
+      author_name, content, author_image
     });
 
     if (error) return { error: error.message };
@@ -229,7 +234,7 @@ export async function addTestimonial(formData: FormData): Promise<{ error: strin
   }
 }
 
-export async function updateTestimonial(formData: FormData): Promise<{ error: string } | null> {
+export async function updateTestimonial(formData: FormData): Promise<ActionResult> {
   try {
     const supabase = await checkAuth();
     
@@ -239,9 +244,7 @@ export async function updateTestimonial(formData: FormData): Promise<{ error: st
     const author_image = formData.get('author_image') as string;
 
     const { error } = await supabase.from('testimonials').update({
-      author_name,
-      content,
-      author_image
+      author_name, content, author_image
     }).eq('id', id);
 
     if (error) return { error: error.message };
@@ -255,209 +258,227 @@ export async function updateTestimonial(formData: FormData): Promise<{ error: st
   }
 }
 
-export async function deleteTestimonial(id: string) {
-  const supabase = await checkAuth();
+export async function deleteTestimonial(id: string): Promise<ActionResult> {
+  try {
+    const supabase = await checkAuth();
+    const { data: t } = await supabase.from('testimonials').select('author_name').eq('id', id).single();
+    const author = t?.author_name || 'Unknown Entry';
 
-  // Get author_name for logging
-  const { data: t } = await supabase.from('testimonials').select('author_name').eq('id', id).single();
-  const author = t?.author_name || 'Unknown Entry';
+    const { error } = await supabase.from('testimonials').delete().eq('id', id);
+    if (error) return { error: error.message };
+    await logActivity(supabase, `Removed journal entry: ${author}`, 'delete');
 
-  const { error } = await supabase.from('testimonials').delete().eq('id', id);
-  if (error) throw new Error(error.message);
-  await logActivity(supabase, `Removed journal entry: ${author}`, 'delete');
-
-  revalidatePath('/');
-  revalidatePath('/admin/testimonials');
-}
-
-export async function addCredential(formData: FormData) {
-  const supabase = await checkAuth();
-
-  const title = formData.get('title') as string;
-  const description = formData.get('description') as string;
-  const date = formData.get('date') as string;
-  const type = formData.get('type') as string;
-  const url = formData.get('url') as string | null;
-  const image_url = formData.get('image_url') as string | null;
-
-  const { error } = await supabase.from('credentials').insert({ title, description, date, type, url: url || null, image_url: image_url || null });
-  if (error) throw new Error(error.message);
-  await logActivity(supabase, `Added credential: ${title}`, 'verified');
-
-  revalidatePath('/admin/credentials');
-  revalidatePath('/about');
-}
-
-export async function updateCredential(formData: FormData) {
-  const supabase = await checkAuth();
-
-  const id = formData.get('id') as string;
-  const title = formData.get('title') as string;
-  const description = formData.get('description') as string;
-  const date = formData.get('date') as string;
-  const type = formData.get('type') as string;
-  const url = formData.get('url') as string | null;
-  const image_url = formData.get('image_url') as string | null;
-
-  const { error } = await supabase.from('credentials').update({ title, description, date, type, url: url || null, image_url: image_url || null }).eq('id', id);
-  if (error) throw new Error(error.message);
-  await logActivity(supabase, `Updated credential: ${title}`, 'edit_document');
-
-  revalidatePath('/admin/credentials');
-  revalidatePath('/about');
-}
-
-export async function deleteCredential(id: string) {
-  const supabase = await checkAuth();
-
-  // Get title for logging
-  const { data: c } = await supabase.from('credentials').select('title').eq('id', id).single();
-  const title = c?.title || 'Unknown Credential';
-
-  const { error } = await supabase.from('credentials').delete().eq('id', id);
-  if (error) throw new Error(error.message);
-  await logActivity(supabase, `Removed credential: ${title}`, 'delete');
-
-  revalidatePath('/admin/credentials');
-}
-
-export async function addLink(formData: FormData) {
-  const supabase = await checkAuth();
-
-  const title = formData.get('title') as string;
-  const icon = formData.get('platform') as string; // Maps to platform in UI
-  const url = formData.get('url') as string;
-
-  const { error } = await supabase.from('links').insert({
-    title,
-    icon,
-    url
-  });
-
-  if (error) throw new Error(error.message);
-  revalidatePath('/');
-  revalidatePath('/admin/links');
-}
-
-export async function updateLink(formData: FormData) {
-  const supabase = await checkAuth();
-
-  const id = formData.get('id') as string;
-  const title = formData.get('title') as string;
-  const icon = formData.get('platform') as string;
-  const url = formData.get('url') as string;
-
-  const { error } = await supabase.from('links').update({
-    title,
-    icon,
-    url
-  }).eq('id', id);
-
-  if (error) throw new Error(error.message);
-  revalidatePath('/');
-  revalidatePath('/admin/links');
-}
-
-export async function deleteLink(id: string) {
-  const supabase = await checkAuth();
-  const { error } = await supabase.from('links').delete().eq('id', id);
-  if (error) throw new Error(error.message);
-  revalidatePath('/');
-  revalidatePath('/admin/links');
-}
-
-export async function updateProfile(formData: FormData) {
-  const supabase = await checkAuth();
-  
-  const display_name = formData.get('display_name') as string;
-  const email = formData.get('email') as string;
-  const bio = formData.get('bio') as string;
-  const tagline = formData.get('tagline') as string;
-  const availability_status = formData.get('availability_status') as string;
-  const avatar = formData.get('avatar') as string;
-  const hero_image = formData.get('hero_image') as string;
-  const about_image = formData.get('about_image') as string;
-  const marquee = formData.get('marquee') as string;
-  const instagram_url = formData.get('instagram_url') as string;
-  const linkedin_url = formData.get('linkedin_url') as string;
-  const resume_url = formData.get('resume_url') as string;
-
-  const about_description = formData.get('about_description') as string;
-  const currently = formData.get('currently') as string;
-  const college = formData.get('college') as string;
-  const school = formData.get('school') as string;
-  const higher_secondary_education = formData.get('higher_secondary_education') as string;
-  const born_in = formData.get('born_in') as string;
-  const currently_based_in = formData.get('currently_based_in') as string;
-
-  // Get existing profile id if any
-  const { data: existing } = await supabase.from('profile').select('id').limit(1).single();
-
-  const profileData = {
-    display_name,
-    email,
-    bio,
-    tagline,
-    availability_status,
-    avatar,
-    hero_image,
-    about_image,
-    marquee,
-    instagram_url,
-    linkedin_url,
-    resume_url,
-    about_description,
-    currently,
-    college,
-    school,
-    currently_based_in,
-    born_in,
-    higher_secondary_education
-  };
-
-  if (existing?.id) {
-    const { error } = await supabase.from('profile').update(profileData).eq('id', existing.id);
-    if (error) {
-      if (error.message.includes('schema cache') || error.message.includes('column') || error.code === 'PGRST204') {
-        throw new Error('Database column "email" is missing. Please run this SQL in your Supabase Dashboard: ALTER TABLE public.profile ADD COLUMN email text;');
-      }
-      throw new Error(error.message);
-    }
-  } else {
-    const { error } = await supabase.from('profile').insert(profileData);
-    if (error) {
-      if (error.message.includes('schema cache') || error.message.includes('column') || error.code === 'PGRST204') {
-        throw new Error('Database column "email" is missing. Please run this SQL in your Supabase Dashboard: ALTER TABLE public.profile ADD COLUMN email text;');
-      }
-      throw new Error(error.message);
-    }
+    revalidatePath('/');
+    revalidatePath('/admin/testimonials');
+    return null;
+  } catch (err: any) {
+    return { error: err?.message || 'Failed to delete journal entry' };
   }
-  
-  await logActivity(supabase, `Edited bio & profile`, 'person');
-
-  revalidatePath('/');
-  revalidatePath('/about');
-  revalidatePath('/admin/profile');
 }
 
-export async function updateAvailability(status: string) {
-  const supabase = await checkAuth();
-  const { data: existing } = await supabase.from('profile').select('id').limit(1).single();
-  
-  if (existing?.id) {
-    const { error } = await supabase.from('profile').update({
-      availability_status: status
-    }).eq('id', existing.id);
-    if (error) throw new Error(error.message);
-  } else {
-    const { error } = await supabase.from('profile').insert({
-      availability_status: status
-    });
-    if (error) throw new Error(error.message);
+export async function addCredential(formData: FormData): Promise<ActionResult> {
+  try {
+    const supabase = await checkAuth();
+
+    const title = formData.get('title') as string;
+    const description = formData.get('description') as string;
+    const date = formData.get('date') as string;
+    const type = formData.get('type') as string;
+    const url = formData.get('url') as string | null;
+    const image_url = formData.get('image_url') as string | null;
+
+    const { error } = await supabase.from('credentials').insert({ title, description, date, type, url: url || null, image_url: image_url || null });
+    if (error) return { error: error.message };
+    await logActivity(supabase, `Added credential: ${title}`, 'verified');
+
+    revalidatePath('/admin/credentials');
+    revalidatePath('/about');
+    return null;
+  } catch (err: any) {
+    return { error: err?.message || 'Failed to add credential' };
   }
+}
 
-  await logActivity(supabase, `Updated availability to ${status === 'working' ? 'Unavailable' : 'Open for Work'}`, 'work');
+export async function updateCredential(formData: FormData): Promise<ActionResult> {
+  try {
+    const supabase = await checkAuth();
 
-  revalidatePath('/');
-  revalidatePath('/admin');
+    const id = formData.get('id') as string;
+    const title = formData.get('title') as string;
+    const description = formData.get('description') as string;
+    const date = formData.get('date') as string;
+    const type = formData.get('type') as string;
+    const url = formData.get('url') as string | null;
+    const image_url = formData.get('image_url') as string | null;
+
+    const { error } = await supabase.from('credentials').update({ title, description, date, type, url: url || null, image_url: image_url || null }).eq('id', id);
+    if (error) return { error: error.message };
+    await logActivity(supabase, `Updated credential: ${title}`, 'edit_document');
+
+    revalidatePath('/admin/credentials');
+    revalidatePath('/about');
+    return null;
+  } catch (err: any) {
+    return { error: err?.message || 'Failed to update credential' };
+  }
+}
+
+export async function deleteCredential(id: string): Promise<ActionResult> {
+  try {
+    const supabase = await checkAuth();
+    const { data: c } = await supabase.from('credentials').select('title').eq('id', id).single();
+    const title = c?.title || 'Unknown Credential';
+
+    const { error } = await supabase.from('credentials').delete().eq('id', id);
+    if (error) return { error: error.message };
+    await logActivity(supabase, `Removed credential: ${title}`, 'delete');
+
+    revalidatePath('/admin/credentials');
+    return null;
+  } catch (err: any) {
+    return { error: err?.message || 'Failed to delete credential' };
+  }
+}
+
+export async function addLink(formData: FormData): Promise<ActionResult> {
+  try {
+    const supabase = await checkAuth();
+
+    const title = formData.get('title') as string;
+    const icon = formData.get('platform') as string; // Maps to platform in UI
+    const url = formData.get('url') as string;
+
+    const { error } = await supabase.from('links').insert({ title, icon, url });
+    if (error) return { error: error.message };
+
+    revalidatePath('/');
+    revalidatePath('/admin/links');
+    return null;
+  } catch (err: any) {
+    return { error: err?.message || 'Failed to add link' };
+  }
+}
+
+export async function updateLink(formData: FormData): Promise<ActionResult> {
+  try {
+    const supabase = await checkAuth();
+
+    const id = formData.get('id') as string;
+    const title = formData.get('title') as string;
+    const icon = formData.get('platform') as string;
+    const url = formData.get('url') as string;
+
+    const { error } = await supabase.from('links').update({ title, icon, url }).eq('id', id);
+    if (error) return { error: error.message };
+
+    revalidatePath('/');
+    revalidatePath('/admin/links');
+    return null;
+  } catch (err: any) {
+    return { error: err?.message || 'Failed to update link' };
+  }
+}
+
+export async function deleteLink(id: string): Promise<ActionResult> {
+  try {
+    const supabase = await checkAuth();
+    const { error } = await supabase.from('links').delete().eq('id', id);
+    if (error) return { error: error.message };
+
+    revalidatePath('/');
+    revalidatePath('/admin/links');
+    return null;
+  } catch (err: any) {
+    return { error: err?.message || 'Failed to delete link' };
+  }
+}
+
+export async function updateProfile(formData: FormData): Promise<ActionResult> {
+  try {
+    const supabase = await checkAuth();
+    
+    const display_name = formData.get('display_name') as string;
+    const email = formData.get('email') as string;
+    const bio = formData.get('bio') as string;
+    const tagline = formData.get('tagline') as string;
+    const availability_status = formData.get('availability_status') as string;
+    const avatar = formData.get('avatar') as string;
+    const hero_image = formData.get('hero_image') as string;
+    const about_image = formData.get('about_image') as string;
+    const marquee = formData.get('marquee') as string;
+    const instagram_url = formData.get('instagram_url') as string;
+    const linkedin_url = formData.get('linkedin_url') as string;
+    const resume_url = formData.get('resume_url') as string;
+
+    const about_description = formData.get('about_description') as string;
+    const currently = formData.get('currently') as string;
+    const college = formData.get('college') as string;
+    const school = formData.get('school') as string;
+    const higher_secondary_education = formData.get('higher_secondary_education') as string;
+    const born_in = formData.get('born_in') as string;
+    const currently_based_in = formData.get('currently_based_in') as string;
+
+    // Get existing profile id if any
+    const { data: existing } = await supabase.from('profile').select('id').limit(1).single();
+
+    const profileData = {
+      display_name, email, bio, tagline, availability_status, avatar,
+      hero_image, about_image, marquee, instagram_url, linkedin_url, resume_url,
+      about_description, currently, college, school, currently_based_in, born_in, higher_secondary_education
+    };
+
+    if (existing?.id) {
+      const { error } = await supabase.from('profile').update(profileData).eq('id', existing.id);
+      if (error) {
+        if (error.message.includes('schema cache') || error.message.includes('column') || error.code === 'PGRST204') {
+          return { error: 'Database column "email" is missing. Please run: ALTER TABLE public.profile ADD COLUMN email text;' };
+        }
+        return { error: error.message };
+      }
+    } else {
+      const { error } = await supabase.from('profile').insert(profileData);
+      if (error) {
+        if (error.message.includes('schema cache') || error.message.includes('column') || error.code === 'PGRST204') {
+          return { error: 'Database column "email" is missing. Please run: ALTER TABLE public.profile ADD COLUMN email text;' };
+        }
+        return { error: error.message };
+      }
+    }
+    
+    await logActivity(supabase, `Edited bio & profile`, 'person');
+
+    revalidatePath('/');
+    revalidatePath('/about');
+    revalidatePath('/admin/profile');
+    return null;
+  } catch (err: any) {
+    return { error: err?.message || 'Failed to update profile' };
+  }
+}
+
+export async function updateAvailability(status: string): Promise<ActionResult> {
+  try {
+    const supabase = await checkAuth();
+    const { data: existing } = await supabase.from('profile').select('id').limit(1).single();
+    
+    if (existing?.id) {
+      const { error } = await supabase.from('profile').update({
+        availability_status: status
+      }).eq('id', existing.id);
+      if (error) return { error: error.message };
+    } else {
+      const { error } = await supabase.from('profile').insert({
+        availability_status: status
+      });
+      if (error) return { error: error.message };
+    }
+
+    await logActivity(supabase, `Updated availability to ${status === 'working' ? 'Unavailable' : 'Open for Work'}`, 'work');
+
+    revalidatePath('/');
+    revalidatePath('/admin');
+    return null;
+  } catch (err: any) {
+    return { error: err?.message || 'Failed to update availability' };
+  }
 }
