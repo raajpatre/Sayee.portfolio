@@ -53,7 +53,12 @@ export default function ProfileForm({ initialProfile }: { initialProfile: any })
         if (heroFile && heroFile.size > 0) {
           const up = new FormData();
           up.append('file', heroFile);
-          heroUrl = await uploadImage(up);
+          const uploadResult = await uploadImage(up);
+          if ('error' in uploadResult) {
+            setErrorMsg(uploadResult.error);
+            return;
+          }
+          heroUrl = uploadResult.url;
         }
 
         const finalAboutUrls: string[] = [];
@@ -61,8 +66,12 @@ export default function ProfileForm({ initialProfile }: { initialProfile: any })
           if (img.file) {
             const up = new FormData();
             up.append('file', img.file);
-            const uploadedUrl = await uploadImage(up);
-            finalAboutUrls.push(uploadedUrl);
+            const uploadResult = await uploadImage(up);
+            if ('error' in uploadResult) {
+              setErrorMsg(uploadResult.error);
+              return;
+            }
+            finalAboutUrls.push(uploadResult.url);
           } else {
             finalAboutUrls.push(img.url);
           }

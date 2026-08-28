@@ -43,7 +43,13 @@ export default function ProjectForm({ initialData, onBack }: { initialData?: any
       if (file && file.size > 0) {
         const uploadFormData = new FormData();
         uploadFormData.append('file', file);
-        cover_image = await uploadImage(uploadFormData);
+        const uploadResult = await uploadImage(uploadFormData);
+        if ('error' in uploadResult) {
+          setError(uploadResult.error);
+          setLoading(false);
+          return;
+        }
+        cover_image = uploadResult.url;
       }
 
       const title = formData.get('title') as string;

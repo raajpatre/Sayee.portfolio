@@ -57,7 +57,12 @@ export default function CredentialsManager({ initialCredentials }: { initialCred
         if (file && file.size > 0) {
           const uploadFormData = new FormData();
           uploadFormData.append('file', file);
-          image_url = await uploadImage(uploadFormData);
+          const uploadResult = await uploadImage(uploadFormData);
+          if ('error' in uploadResult) {
+            setError(uploadResult.error);
+            return;
+          }
+          image_url = uploadResult.url;
         }
         
         formData.set('image_url', image_url);
