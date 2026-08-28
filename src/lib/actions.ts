@@ -204,45 +204,55 @@ export async function deleteService(id: string) {
   revalidatePath('/admin/services');
 }
 
-export async function addTestimonial(formData: FormData) {
-  const supabase = await checkAuth();
-  
-  const author_name = formData.get('author_name') as string;
-  const content = formData.get('content') as string;
-  const author_image = formData.get('author_image') as string;
+export async function addTestimonial(formData: FormData): Promise<{ error: string } | null> {
+  try {
+    const supabase = await checkAuth();
+    
+    const author_name = formData.get('author_name') as string;
+    const content = formData.get('content') as string;
+    const author_image = formData.get('author_image') as string;
 
-  const { error } = await supabase.from('testimonials').insert({
-    author_name,
-    content,
-    author_image
-  });
+    const { error } = await supabase.from('testimonials').insert({
+      author_name,
+      content,
+      author_image
+    });
 
-  if (error) throw new Error(error.message);
-  await logActivity(supabase, `Added journal entry: ${author_name}`, 'book_4');
+    if (error) return { error: error.message };
+    await logActivity(supabase, `Added journal entry: ${author_name}`, 'book_4');
 
-  revalidatePath('/');
-  revalidatePath('/admin/testimonials');
+    revalidatePath('/');
+    revalidatePath('/admin/testimonials');
+    return null;
+  } catch (err: any) {
+    return { error: err?.message || 'Failed to add journal entry' };
+  }
 }
 
-export async function updateTestimonial(formData: FormData) {
-  const supabase = await checkAuth();
-  
-  const id = formData.get('id') as string;
-  const author_name = formData.get('author_name') as string;
-  const content = formData.get('content') as string;
-  const author_image = formData.get('author_image') as string;
+export async function updateTestimonial(formData: FormData): Promise<{ error: string } | null> {
+  try {
+    const supabase = await checkAuth();
+    
+    const id = formData.get('id') as string;
+    const author_name = formData.get('author_name') as string;
+    const content = formData.get('content') as string;
+    const author_image = formData.get('author_image') as string;
 
-  const { error } = await supabase.from('testimonials').update({
-    author_name,
-    content,
-    author_image
-  }).eq('id', id);
+    const { error } = await supabase.from('testimonials').update({
+      author_name,
+      content,
+      author_image
+    }).eq('id', id);
 
-  if (error) throw new Error(error.message);
-  await logActivity(supabase, `Updated journal entry: ${author_name}`, 'edit_document');
+    if (error) return { error: error.message };
+    await logActivity(supabase, `Updated journal entry: ${author_name}`, 'edit_document');
 
-  revalidatePath('/');
-  revalidatePath('/admin/testimonials');
+    revalidatePath('/');
+    revalidatePath('/admin/testimonials');
+    return null;
+  } catch (err: any) {
+    return { error: err?.message || 'Failed to update journal entry' };
+  }
 }
 
 export async function deleteTestimonial(id: string) {

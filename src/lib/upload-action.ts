@@ -26,23 +26,23 @@ function detectMimeFromBytes(bytes: Uint8Array): string | null {
   return null;
 }
 
-export async function uploadImage(formData: FormData) {
+export async function uploadImage(formData: FormData): Promise<{ url: string } | { error: string }> {
   // 1. Verify user — F-09/F-16: throw generic message; never leak Supabase error details.
   const supabase = await createClient();
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   if (authError || !user) {
     // Log internally but never expose Supabase error message to the client.
     console.error('[uploadImage] Auth error:', authError?.message);
-    throw new Error('Unauthorized');
+    return { error: 'Unauthorized' };
   }
 
   // 2. Extract file
   const file = formData.get('file') as File;
-  if (!file) throw new Error('No file provided');
+  if (!file) return { error: 'No file provided' };
 
   // 3. F-02: Enforce server-side file size limit (5 MB).
   if (file.size > MAX_BYTES) {
-    throw new Error(`File too large. Maximum allowed size is 5 MB.`);
+    return { error: 'File too large. Maximum allowed size is 5 MB.' };
   }
 
   // 4. Read bytes and detect real MIME type from magic bytes (not file.type).
@@ -51,7 +51,7 @@ export async function uploadImage(formData: FormData) {
   const detectedMime = detectMimeFromBytes(new Uint8Array(arrayBuffer));
 
   if (!detectedMime) {
-    throw new Error('Unsupported file type. Only JPEG, PNG, WebP, and GIF images are allowed.');
+    return { error: 'Unsupported file type. Only JPEG, PNG, WebP, and GIF images are allowed.' };
   }
 
   // 5. Upload to Cloudinary using verified MIME type and restrict to images only.
@@ -64,12 +64,10 @@ export async function uploadImage(formData: FormData) {
       allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'gif'],
     });
   } catch (cloudinaryErr: any) {
-    // Cloudinary SDK throws custom objects that Next.js can't serialize.
-    // Re-throw as a plain Error so the client receives the real message.
     const msg = cloudinaryErr?.message || cloudinaryErr?.error?.message || 'Image upload failed. Please check your Cloudinary credentials in Cloudflare.';
     console.error('[uploadImage] Cloudinary error:', msg);
-    throw new Error(msg);
+    return { error: msg };
   }
 
-  return result.secure_url;
+  return { url: result.secure_url };
 }

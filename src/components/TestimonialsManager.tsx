@@ -50,19 +50,29 @@ export default function TestimonialsManager({ initialTestimonials }: { initialTe
         if (file && file.size > 0) {
           const uploadFormData = new FormData();
           uploadFormData.append('file', file);
-          author_image = await uploadImage(uploadFormData);
+          const uploadResult = await uploadImage(uploadFormData);
+          if ('error' in uploadResult) {
+            setError(uploadResult.error);
+            return;
+          }
+          author_image = uploadResult.url;
         }
         formData.set('author_image', author_image);
 
+        let result;
         if (modal.mode === 'add') {
-          await addTestimonial(formData);
+          result = await addTestimonial(formData);
         } else if (modal.mode === 'edit') {
-          await updateTestimonial(formData);
+          result = await updateTestimonial(formData);
+        }
+        if (result && 'error' in result) {
+          setError(result.error);
+          return;
         }
         closeModal();
         window.location.reload();
       } catch (err: any) {
-        setError(err.message);
+        setError(err?.message || 'An unexpected error occurred');
       }
     });
   }
