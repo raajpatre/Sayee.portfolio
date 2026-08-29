@@ -33,15 +33,18 @@ async function generateSignature(params: Record<string, string>, apiSecret: stri
 
 export async function POST(request: Request) {
   try {
-    // CSRF Protection: Validate Origin/Referer
+    // CSRF Protection: Validate Origin matches Host
     const origin = request.headers.get('origin');
-    const referer = request.headers.get('referer');
-    const allowedOrigin = 'https://sayee-portfolio.pages.dev';
+    const host = request.headers.get('host');
     
-    // In production, enforce origin matching
-    if (process.env.NODE_ENV === 'production') {
-      if ((origin && !origin.startsWith(allowedOrigin)) || (referer && !referer.startsWith(allowedOrigin))) {
-        return NextResponse.json({ error: 'CSRF validation failed' }, { status: 403 });
+    if (origin && host) {
+      try {
+        const originUrl = new URL(origin);
+        if (originUrl.host !== host) {
+          return NextResponse.json({ error: 'CSRF validation failed' }, { status: 403 });
+        }
+      } catch (e) {
+        return NextResponse.json({ error: 'Invalid origin' }, { status: 400 });
       }
     }
 
