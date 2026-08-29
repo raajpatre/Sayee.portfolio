@@ -66,6 +66,7 @@ export default function CredentialsManager({ initialCredentials }: { initialCred
         }
         
         formData.set('image_url', image_url);
+        formData.delete('file');
 
         if (modal.mode === 'add') {
           const result = await addCredential(formData);

@@ -58,6 +58,7 @@ export default function TestimonialsManager({ initialTestimonials }: { initialTe
           author_image = uploadResult.url;
         }
         formData.set('author_image', author_image);
+        formData.delete('file');
 
         let result;
         if (modal.mode === 'add') {

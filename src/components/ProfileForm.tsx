@@ -86,6 +86,10 @@ export default function ProfileForm({ initialProfile }: { initialProfile: any })
         // preserve the current avatar/availability status in this form since they are handled elsewhere or hidden
         formData.append('availability_status', initialProfile?.availability_status || 'Open for Work');
         formData.append('avatar', initialProfile?.avatar || '');
+
+        formData.delete('hero_file');
+        formData.delete('about_files');
+
         const result = await updateProfile(formData);
         if (result?.error) {
           setErrorMsg(result.error);

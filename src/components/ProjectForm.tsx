@@ -63,6 +63,9 @@ export default function ProjectForm({ initialData, onBack }: { initialData?: any
       formData.set('featured', featured ? 'true' : 'false');
       formData.set('published', published ? 'true' : 'false');
       
+      // Remove the raw file before sending to the server action to avoid large payloads crashing Cloudflare Workers.
+      formData.delete('file');
+      
       if (initialData?.id) {
         formData.set('id', initialData.id);
         const result = await updateProject(formData);
