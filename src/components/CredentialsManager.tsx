@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useTransition, useRef } from 'react';
+import { useState, useTransition } from 'react';
+import { toast } from 'sonner';
 import { addCredential, updateCredential, deleteCredential } from '@/lib/actions';
 import { uploadImage } from '@/lib/upload-client';
 
@@ -29,13 +30,12 @@ const TYPE_STYLES: Record<string, { label: string; bg: string; text: string }> =
 export default function CredentialsManager({ initialCredentials }: { initialCredentials: Credential[] }) {
   const [credentials, setCredentials] = useState<Credential[]>(initialCredentials);
   const [modal, setModal] = useState<ModalState>({ mode: 'closed' });
-  const [error, setError] = useState('');
   const [isPending, startTransition] = useTransition();
   const [preview, setPreview] = useState<string>('');
 
-  function openAdd() { setError(''); setPreview(''); setModal({ mode: 'add' }); }
-  function openEdit(c: Credential) { setError(''); setPreview(c.image_url || ''); setModal({ mode: 'edit', credential: c }); }
-  function closeModal() { setModal({ mode: 'closed' }); setError(''); setPreview(''); }
+  function openAdd() { setPreview(''); setModal({ mode: 'add' }); }
+  function openEdit(c: Credential) { setPreview(c.image_url || ''); setModal({ mode: 'edit', credential: c }); }
+  function closeModal() { setModal({ mode: 'closed' }); setPreview(''); }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -46,7 +46,6 @@ export default function CredentialsManager({ initialCredentials }: { initialCred
 
   async function handleSave(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setError('');
     const formData = new FormData(e.currentTarget);
     const file = formData.get('file') as File;
 
@@ -59,7 +58,7 @@ export default function CredentialsManager({ initialCredentials }: { initialCred
           uploadFormData.append('file', file);
           const uploadResult = await uploadImage(uploadFormData);
           if ('error' in uploadResult) {
-            setError(uploadResult.error);
+            toast.error(uploadResult.error);
             return;
           }
           image_url = uploadResult.url;
@@ -71,20 +70,22 @@ export default function CredentialsManager({ initialCredentials }: { initialCred
         if (modal.mode === 'add') {
           const result = await addCredential(formData);
           if (result?.error) {
-            setError(result.error);
+            toast.error(result.error);
             return;
           }
+          toast.success('Credential added successfully');
         } else if (modal.mode === 'edit') {
           const result = await updateCredential(formData);
           if (result?.error) {
-            setError(result.error);
+            toast.error(result.error);
             return;
           }
+          toast.success('Credential updated successfully');
         }
         closeModal();
         window.location.reload();
       } catch (err: any) {
-        setError(err.message);
+        toast.error(err.message || 'Failed to save credential');
       }
     });
   }
@@ -95,12 +96,13 @@ export default function CredentialsManager({ initialCredentials }: { initialCred
       try {
         const result = await deleteCredential(id);
         if (result?.error) {
-          alert(result.error);
+          toast.error(result.error);
           return;
         }
         setCredentials((prev) => prev.filter((c) => c.id !== id));
+        toast.success('Credential deleted successfully');
       } catch (err: any) {
-        alert(err.message);
+        toast.error(err.message || 'Failed to delete credential');
       }
     });
   }
@@ -203,12 +205,6 @@ export default function CredentialsManager({ initialCredentials }: { initialCred
             <form onSubmit={handleSave} className="p-6 space-y-4">
               {modal.mode === 'edit' && (
                 <input type="hidden" name="id" value={editingCredential?.id} />
-              )}
-
-              {error && (
-                <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-[13px] text-red-600 font-medium">
-                  {error}
-                </div>
               )}
 
               {/* Type */}

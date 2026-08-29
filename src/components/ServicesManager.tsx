@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { toast } from 'sonner';
 import { addService, updateService, deleteService } from '@/lib/actions';
 
 export type Service = {
@@ -20,48 +21,45 @@ type ModalState =
 export default function ServicesManager({ initialServices }: { initialServices: Service[] }) {
   const [services, setServices] = useState<Service[]>(initialServices);
   const [modal, setModal] = useState<ModalState>({ mode: 'closed' });
-  const [error, setError] = useState('');
   const [isPending, startTransition] = useTransition();
   const [iconPreview, setIconPreview] = useState('🎨');
 
   function openAdd() {
-    setError('');
     setIconPreview('🎨');
     setModal({ mode: 'add' });
   }
   function openEdit(s: Service) {
-    setError('');
     setIconPreview(s.icon || '🎨');
     setModal({ mode: 'edit', service: s });
   }
   function closeModal() {
     setModal({ mode: 'closed' });
-    setError('');
   }
 
   async function handleSave(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setError('');
     const formData = new FormData(e.currentTarget);
     startTransition(async () => {
       try {
         if (modal.mode === 'add') {
           const result = await addService(formData);
           if (result?.error) {
-            setError(result.error);
+            toast.error(result.error);
             return;
           }
+          toast.success('Service added successfully');
         } else if (modal.mode === 'edit') {
           const result = await updateService(formData);
           if (result?.error) {
-            setError(result.error);
+            toast.error(result.error);
             return;
           }
+          toast.success('Service updated successfully');
         }
         closeModal();
         window.location.reload();
       } catch (err: any) {
-        setError(err.message);
+        toast.error(err.message || 'Failed to save service');
       }
     });
   }
@@ -72,12 +70,13 @@ export default function ServicesManager({ initialServices }: { initialServices: 
       try {
         const result = await deleteService(id);
         if (result?.error) {
-          alert(result.error);
+          toast.error(result.error);
           return;
         }
         setServices((prev) => prev.filter((s) => s.id !== id));
+        toast.success('Service deleted successfully');
       } catch (err: any) {
-        alert(err.message);
+        toast.error(err.message || 'Failed to delete service');
       }
     });
   }
@@ -203,13 +202,6 @@ export default function ServicesManager({ initialServices }: { initialServices: 
             <form onSubmit={handleSave} className="space-y-5">
               {modal.mode === 'edit' && (
                 <input type="hidden" name="id" value={editingService?.id} />
-              )}
-
-              {error && (
-                <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-[13px] text-red-600 font-medium flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[16px]">error</span>
-                  {error}
-                </div>
               )}
 
               {/* Icon */}

@@ -1,4 +1,5 @@
-/* eslint-disable react/no-unescaped-entities, @next/next/no-img-element, jsx-a11y/alt-text */
+/* eslint-disable react/no-unescaped-entities, jsx-a11y/alt-text */
+import Image from 'next/image';
 import Link from 'next/link';
 import { getProfile, getProjects, getServices, getTestimonials } from '@/lib/api';
 import ServicesCarousel from '@/components/ServicesCarousel';
@@ -162,9 +163,12 @@ export default async function Home() {
             <div className="relative w-2/3 max-w-[280px] md:w-full md:max-w-lg aspect-square">
               {/* Large Image Blob */}
               <div className="w-full h-full border-[3px] border-brand-black hero-blob overflow-hidden bg-white shadow-[8px_8px_0px_0px_rgba(26,26,26,1)] z-10 relative">
-                <img
-                  className="w-full h-full object-cover"
-                  data-alt="A striking portrait of a confident, creative professional in a vibrant, maximalist studio setting. Bright, high-contrast lighting emphasizing bold colors. The style is modern, energetic, and slightly eccentric, fitting a loud design portfolio. Lots of yellow and dark accents."
+                <Image
+                  fill
+                  priority
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  className="object-cover"
+                  alt="Hero profile image"
                   src={profile?.hero_image || "https://lh3.googleusercontent.com/aida-public/AB6AXuDN5thwa93cesb0qwv6AoS405ld05e3cUd11ubtFuaYxBZHZHorIM5Ntu84dyvT5yZdmPukRhEVGGn6r3RswJjImf2zrqXKMIH0B6hOMhG9VyaX1x-sN6gLfOWDm7lXsVEqpDjvfUmn91Scq3lAkN6p92ypbeavt9Eo8NASJi_2v64JbI_s5WzTUu748_NdTPhKl4CBh2WzfmKny0fcxC-AWLFJANhW4DEo_Zhq_V7S2mKLK1BQ7Q-Z"}
                 />
               </div>
@@ -207,15 +211,17 @@ export default async function Home() {
                   ];
                   return (
                     <div key={idx} className={`absolute ${positions[idx]} border-[4px] md:border-[6px] border-white shadow-hard-sm md:shadow-hard-md bg-white transition-transform duration-500 hover:scale-[1.08] hover:z-20`}>
-                      <img className="w-full aspect-square object-cover" src={img} />
+                      <Image fill sizes="(max-width: 768px) 33vw, 20vw" className="object-cover" alt="Collage image" src={img} />
                     </div>
                   );
                 })}
                 {/* Primary large image */}
                 <div className="relative z-10 -rotate-3 border-[6px] md:border-8 border-white shadow-hard-md md:shadow-hard-lg bg-white w-[85%] md:w-[90%] transition-transform duration-500 hover:rotate-0 hover:scale-[1.02]">
-                  <img
-                    className="w-full aspect-[4/5] object-cover"
-                    data-alt="A candid, warm lifestyle photo of a graphic designer working at a desk filled with colorful prints, markers, and a coffee cup. High-key lighting, vibrant colors (yellows, corals, deep blacks). The mood is authentic, creative, and lively."
+                  <Image
+                    fill
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    className="object-cover"
+                    alt="Candid about image"
                     src={aboutImages[0]}
                   />
                 </div>

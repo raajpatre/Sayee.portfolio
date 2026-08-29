@@ -1,13 +1,12 @@
 'use client';
 
 import { useState, useTransition, useRef } from 'react';
+import { toast } from 'sonner';
 import { updateProfile } from '@/lib/actions';
 import { uploadImage } from '@/lib/upload-client';
 
 export default function ProfileForm({ initialProfile }: { initialProfile: any }) {
   const [isPending, startTransition] = useTransition();
-  const [errorMsg, setErrorMsg] = useState('');
-  const [successMsg, setSuccessMsg] = useState('');
 
   const initialAboutImages = (() => {
     try {
@@ -41,8 +40,6 @@ export default function ProfileForm({ initialProfile }: { initialProfile: any })
 
   async function handleSave(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setErrorMsg('');
-    setSuccessMsg('');
     
     const formData = new FormData(e.currentTarget);
     const heroFile = formData.get('hero_file') as File;
@@ -55,7 +52,7 @@ export default function ProfileForm({ initialProfile }: { initialProfile: any })
           up.append('file', heroFile);
           const uploadResult = await uploadImage(up);
           if ('error' in uploadResult) {
-            setErrorMsg(uploadResult.error);
+            toast.error(uploadResult.error);
             return;
           }
           heroUrl = uploadResult.url;
@@ -68,7 +65,7 @@ export default function ProfileForm({ initialProfile }: { initialProfile: any })
             up.append('file', img.file);
             const uploadResult = await uploadImage(up);
             if ('error' in uploadResult) {
-              setErrorMsg(uploadResult.error);
+              toast.error(uploadResult.error);
               return;
             }
             finalAboutUrls.push(uploadResult.url);
@@ -92,13 +89,12 @@ export default function ProfileForm({ initialProfile }: { initialProfile: any })
 
         const result = await updateProfile(formData);
         if (result?.error) {
-          setErrorMsg(result.error);
+          toast.error(result.error);
           return;
         }
-        setSuccessMsg('Profile updated successfully!');
-        setTimeout(() => setSuccessMsg(''), 3000);
+        toast.success('Profile updated successfully!');
       } catch (err: any) {
-        setErrorMsg(err.message);
+        toast.error(err.message || 'Failed to update profile');
       }
     });
   }
@@ -114,18 +110,6 @@ export default function ProfileForm({ initialProfile }: { initialProfile: any })
 
   const renderSaveButton = (label: string) => (
     <div className="flex justify-end items-center gap-3 pt-4 border-t border-[#F3F4F6] mt-6">
-      {successMsg && (
-        <span className="text-xs font-bold text-green-600 flex items-center gap-1.5 bg-green-50 border border-green-200 px-3 py-1.5 rounded-lg animate-fade-in">
-          <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
-          Profile saved!
-        </span>
-      )}
-      {errorMsg && (
-        <span className="text-xs font-bold text-red-600 flex items-center gap-1.5 bg-red-50 border border-red-200 px-3 py-1.5 rounded-lg animate-fade-in">
-          <span className="material-symbols-outlined text-[16px]">error</span>
-          {errorMsg}
-        </span>
-      )}
       <button
         type="submit"
         disabled={isPending}

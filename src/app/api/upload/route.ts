@@ -33,6 +33,18 @@ async function generateSignature(params: Record<string, string>, apiSecret: stri
 
 export async function POST(request: Request) {
   try {
+    // CSRF Protection: Validate Origin/Referer
+    const origin = request.headers.get('origin');
+    const referer = request.headers.get('referer');
+    const allowedOrigin = 'https://sayee-portfolio.pages.dev';
+    
+    // In production, enforce origin matching
+    if (process.env.NODE_ENV === 'production') {
+      if ((origin && !origin.startsWith(allowedOrigin)) || (referer && !referer.startsWith(allowedOrigin))) {
+        return NextResponse.json({ error: 'CSRF validation failed' }, { status: 403 });
+      }
+    }
+
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 

@@ -5,6 +5,18 @@ const nextConfig = {
   // silent security regressions from shipping to production.
 
   // F-03 FIX: Security headers applied to every response.
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      }
+    ],
+  },
   async headers() {
     return [
       {

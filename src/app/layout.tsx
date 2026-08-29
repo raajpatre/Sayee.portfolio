@@ -1,6 +1,8 @@
 /* eslint-disable @next/next/no-page-custom-font, @next/next/google-font-display */
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Caveat } from "next/font/google";
+import { Toaster } from "sonner";
+import SmoothScroll from "@/components/SmoothScroll";
 import "./globals.css";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -14,8 +16,31 @@ const caveat = Caveat({
 });
 
 export const metadata: Metadata = {
-  title: "Sayee Kinjavdekar",
-  description: "Welcome to my studio",
+  metadataBase: new URL('https://sayee-portfolio.pages.dev'),
+  title: "Sayee Kinjavdekar | Design that Speaks",
+  description: "A loud, bold, and impactful design portfolio by Sayee Kinjavdekar.",
+  openGraph: {
+    title: "Sayee Kinjavdekar | Design that Speaks",
+    description: "A loud, bold, and impactful design portfolio by Sayee Kinjavdekar.",
+    url: "https://sayee-portfolio.pages.dev",
+    siteName: "Sayee Kinjavdekar Portfolio",
+    images: [
+      {
+        url: "/sayee-home-bg.png",
+        width: 1200,
+        height: 630,
+        alt: "Sayee Kinjavdekar Portfolio",
+      }
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Sayee Kinjavdekar | Design that Speaks",
+    description: "A loud, bold, and impactful design portfolio by Sayee Kinjavdekar.",
+    images: ["/sayee-home-bg.png"],
+  },
 };
 
 export default function RootLayout({
@@ -39,7 +64,10 @@ export default function RootLayout({
       <body
         className={`${plusJakartaSans.variable} ${caveat.variable} font-body-md text-brand-black bg-brand-cream overflow-x-hidden selection:bg-brand-coral selection:text-white antialiased`}
       >
-        {children}
+        <Toaster richColors position="bottom-right" />
+        <SmoothScroll>
+          {children}
+        </SmoothScroll>
       </body>
     </html>
   );

@@ -1,5 +1,36 @@
 /* eslint-disable react/no-unescaped-entities, @next/next/no-img-element, jsx-a11y/alt-text */
-export default function Page() {
+import { Metadata } from 'next';
+import { getProjects } from '@/lib/api';
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const projects = await getProjects();
+  const project = projects.find(p => p.slug === slug);
+  
+  if (!project) return { title: 'Project Not Found' };
+
+  return {
+    title: `${project.title} | Sayee Kinjavdekar`,
+    description: project.description || `View the ${project.title} project by Sayee Kinjavdekar.`,
+    openGraph: {
+      title: `${project.title} | Sayee Kinjavdekar`,
+      description: project.description || `View the ${project.title} project by Sayee Kinjavdekar.`,
+      images: [project.cover_image || "/sayee-home-bg.png"],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${project.title} | Sayee Kinjavdekar`,
+      description: project.description || `View the ${project.title} project by Sayee Kinjavdekar.`,
+      images: [project.cover_image || "/sayee-home-bg.png"],
+    },
+  };
+}
+
+export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const projects = await getProjects();
+  const project = projects.find(p => p.slug === slug);
+
   return (
     <>
 

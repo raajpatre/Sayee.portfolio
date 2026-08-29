@@ -3,6 +3,7 @@
 import { useState, useTransition, useRef } from 'react';
 import { addTestimonial, updateTestimonial, deleteTestimonial } from '@/lib/actions';
 import { uploadImage } from '@/lib/upload-client';
+import { toast } from 'sonner';
 
 type Testimonial = {
   id: string;
@@ -20,7 +21,6 @@ type ModalState =
 export default function TestimonialsManager({ initialTestimonials }: { initialTestimonials: Testimonial[] }) {
   const [testimonials, setTestimonials] = useState<Testimonial[]>(initialTestimonials);
   const [modal, setModal] = useState<ModalState>({ mode: 'closed' });
-  const [error, setError] = useState('');
   const [isPending, startTransition] = useTransition();
   const [preview, setPreview] = useState<string>('');
   const [captionValue, setCaptionValue] = useState<string>('');
@@ -29,9 +29,9 @@ export default function TestimonialsManager({ initialTestimonials }: { initialTe
   const fileInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
-  function openAdd() { setError(''); setPreview(''); setCaptionValue(''); setTitleValue(''); setModal({ mode: 'add' }); }
-  function openEdit(t: Testimonial) { setError(''); setPreview(t.author_image || ''); setCaptionValue(t.content || ''); setTitleValue(t.author_name || ''); setModal({ mode: 'edit', testimonial: t }); }
-  function closeModal() { setModal({ mode: 'closed' }); setError(''); setPreview(''); setCaptionValue(''); setTitleValue(''); }
+  function openAdd() { setPreview(''); setCaptionValue(''); setTitleValue(''); setModal({ mode: 'add' }); }
+  function openEdit(t: Testimonial) { setPreview(t.author_image || ''); setCaptionValue(t.content || ''); setTitleValue(t.author_name || ''); setModal({ mode: 'edit', testimonial: t }); }
+  function closeModal() { setModal({ mode: 'closed' }); setPreview(''); setCaptionValue(''); setTitleValue(''); }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -40,7 +40,6 @@ export default function TestimonialsManager({ initialTestimonials }: { initialTe
 
   async function handleSave(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setError('');
     const formData = new FormData(e.currentTarget);
     const file = formData.get('file') as File;
 
@@ -52,7 +51,7 @@ export default function TestimonialsManager({ initialTestimonials }: { initialTe
           uploadFormData.append('file', file);
           const uploadResult = await uploadImage(uploadFormData);
           if ('error' in uploadResult) {
-            setError(uploadResult.error);
+            toast.error(uploadResult.error);
             return;
           }
           author_image = uploadResult.url;
@@ -67,13 +66,14 @@ export default function TestimonialsManager({ initialTestimonials }: { initialTe
           result = await updateTestimonial(formData);
         }
         if (result && 'error' in result) {
-          setError(result.error);
+          toast.error(result.error);
           return;
         }
+        toast.success(modal.mode === 'add' ? 'Entry added successfully' : 'Entry updated successfully');
         closeModal();
         window.location.reload();
       } catch (err: any) {
-        setError(err?.message || 'An unexpected error occurred');
+        toast.error(err?.message || 'An unexpected error occurred');
       }
     });
   }
@@ -84,12 +84,13 @@ export default function TestimonialsManager({ initialTestimonials }: { initialTe
       try {
         const result = await deleteTestimonial(id);
         if (result?.error) {
-          alert(result.error);
+          toast.error(result.error);
           return;
         }
         setTestimonials((prev) => prev.filter((t) => t.id !== id));
+        toast.success('Entry deleted successfully');
       } catch (err: any) {
-        alert(err.message);
+        toast.error(err?.message || 'Failed to delete entry');
       }
     });
   }
@@ -219,12 +220,6 @@ export default function TestimonialsManager({ initialTestimonials }: { initialTe
             <form ref={formRef} onSubmit={handleSave} className="space-y-5">
               {modal.mode === 'edit' && (
                 <input type="hidden" name="id" value={editingTestimonial?.id} />
-              )}
-              {error && (
-                <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-[13px] text-red-600 font-medium flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[16px]">error</span>
-                  {error}
-                </div>
               )}
 
               {/* Photo Upload */}

@@ -4,10 +4,10 @@ import Link from 'next/link';
 import { useState, useRef } from 'react';
 import { addProject, updateProject } from '@/lib/actions';
 import { uploadImage } from '@/lib/upload-client';
+import { toast } from 'sonner';
 
 export default function ProjectForm({ initialData, onBack }: { initialData?: any, onBack?: () => void }) {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [previews, setPreviews] = useState<string[]>(initialData?.cover_image ? [initialData.cover_image] : []);
   const [featured, setFeatured] = useState(initialData?.featured ?? true);
   const [published, setPublished] = useState(initialData?.published ?? true);
@@ -33,7 +33,6 @@ export default function ProjectForm({ initialData, onBack }: { initialData?: any
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
-    setError('');
 
     try {
       const formData = new FormData(e.currentTarget);
@@ -45,7 +44,7 @@ export default function ProjectForm({ initialData, onBack }: { initialData?: any
         uploadFormData.append('file', file);
         const uploadResult = await uploadImage(uploadFormData);
         if ('error' in uploadResult) {
-          setError(uploadResult.error);
+          toast.error(uploadResult.error);
           setLoading(false);
           return;
         }
@@ -69,17 +68,19 @@ export default function ProjectForm({ initialData, onBack }: { initialData?: any
       if (initialData?.id) {
         formData.set('id', initialData.id);
         const result = await updateProject(formData);
-        if (result?.error) { setError(result.error); setLoading(false); return; }
-        alert('Project updated successfully!');
+        if (result?.error) { toast.error(result.error); setLoading(false); return; }
+        toast.success("Project saved successfully");
+        if (onBack) onBack();
       } else {
         const result = await addProject(formData);
-        if (result?.error) { setError(result.error); setLoading(false); return; }
+        if (result?.error) { toast.error(result.error); setLoading(false); return; }
         formRef.current?.reset();
         setPreviews([]);
-        alert('Project added successfully!');
+        toast.success("Project saved successfully");
+        if (onBack) onBack();
       }
     } catch (err: any) {
-      setError(err.message);
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }
@@ -134,13 +135,6 @@ export default function ProjectForm({ initialData, onBack }: { initialData?: any
           </button>
         </div>
       </div>
-
-      {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-[13px] text-red-600 font-bold flex items-center gap-2">
-          <span className="material-symbols-outlined text-[18px]">error</span>
-          {error}
-        </div>
-      )}
 
       {/* Main Two-Column Layout */}
       <form id="project-form" ref={formRef} onSubmit={handleSubmit}>
