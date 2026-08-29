@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useRef } from 'react';
 import { updateProfile } from '@/lib/actions';
-import { uploadImage } from '@/lib/upload-action';
+import { uploadImage } from '@/lib/upload-client';
 
 export default function ProfileForm({ initialProfile }: { initialProfile: any }) {
   const [isPending, startTransition] = useTransition();

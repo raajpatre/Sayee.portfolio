@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState, useRef } from 'react';
 import { addProject, updateProject } from '@/lib/actions';
-import { uploadImage } from '@/lib/upload-action';
+import { uploadImage } from '@/lib/upload-client';
 
 export default function ProjectForm({ initialData, onBack }: { initialData?: any, onBack?: () => void }) {
   const [loading, setLoading] = useState(false);

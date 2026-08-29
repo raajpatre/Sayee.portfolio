@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useRef } from 'react';
 import { addCredential, updateCredential, deleteCredential } from '@/lib/actions';
-import { uploadImage } from '@/lib/upload-action';
+import { uploadImage } from '@/lib/upload-client';
 
 type Credential = {
   id: string;
