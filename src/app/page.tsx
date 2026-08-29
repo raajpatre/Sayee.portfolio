@@ -210,13 +210,13 @@ export default async function Home() {
                     "bottom-[-12%] right-[5%] rotate-[12deg] w-[45%] md:w-[60%] z-[1]",
                   ];
                   return (
-                    <div key={idx} className={`absolute ${positions[idx]} border-[4px] md:border-[6px] border-white shadow-hard-sm md:shadow-hard-md bg-white transition-transform duration-500 hover:scale-[1.08] hover:z-20`}>
+                    <div key={idx} className={`absolute ${positions[idx]} aspect-square overflow-hidden border-[4px] md:border-[6px] border-white shadow-hard-sm md:shadow-hard-md bg-white transition-transform duration-500 hover:scale-[1.08] hover:z-20`}>
                       <Image fill sizes="(max-width: 768px) 33vw, 20vw" className="object-cover" alt="Collage image" src={img} />
                     </div>
                   );
                 })}
                 {/* Primary large image */}
-                <div className="relative z-10 -rotate-3 border-[6px] md:border-8 border-white shadow-hard-md md:shadow-hard-lg bg-white w-[85%] md:w-[90%] transition-transform duration-500 hover:rotate-0 hover:scale-[1.02]">
+                <div className="relative z-10 -rotate-3 aspect-[4/5] overflow-hidden border-[6px] md:border-8 border-white shadow-hard-md md:shadow-hard-lg bg-white w-[85%] md:w-[90%] transition-transform duration-500 hover:rotate-0 hover:scale-[1.02]">
                   <Image
                     fill
                     sizes="(max-width: 768px) 100vw, 50vw"
