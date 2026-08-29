@@ -3,8 +3,6 @@
 import { createClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
 
-type ActionResult = { error: string } | null;
-
 async function checkAuth() {
   const supabase = await createClient();
   const { data: { user }, error } = await supabase.auth.getUser();
@@ -55,7 +53,11 @@ async function logActivity(supabase: any, actionText: string, icon: string = 'in
   }
 }
 
-export async function addProject(formData: FormData): Promise<ActionResult> {
+// ─── All exported server actions return { error: string } | null ───
+// Next.js production sanitizes thrown errors from server actions,
+// so we return error objects instead to surface real messages to the client.
+
+export async function addProject(formData: FormData): Promise<{ error: string } | null> {
   try {
     const supabase = await checkAuth();
     
@@ -74,7 +76,7 @@ export async function addProject(formData: FormData): Promise<ActionResult> {
 
     if (error) {
       if (error.message.includes('schema cache') || error.message.includes('column') || error.code === 'PGRST204') {
-        return { error: 'Database column "client_name" is missing. Please run: ALTER TABLE public.projects ADD COLUMN client_name text;' };
+        return { error: 'Database column "client_name" is missing. Please run this SQL in your Supabase Dashboard: ALTER TABLE public.projects ADD COLUMN client_name text;' };
       }
       return { error: error.message };
     }
@@ -89,7 +91,7 @@ export async function addProject(formData: FormData): Promise<ActionResult> {
   }
 }
 
-export async function updateProject(formData: FormData): Promise<ActionResult> {
+export async function updateProject(formData: FormData): Promise<{ error: string } | null> {
   try {
     const supabase = await checkAuth();
     
@@ -108,7 +110,7 @@ export async function updateProject(formData: FormData): Promise<ActionResult> {
 
     if (error) {
       if (error.message.includes('schema cache') || error.message.includes('column') || error.code === 'PGRST204') {
-        return { error: 'Database column "client_name" is missing. Please run: ALTER TABLE public.projects ADD COLUMN client_name text;' };
+        return { error: 'Database column "client_name" is missing. Please run this SQL in your Supabase Dashboard: ALTER TABLE public.projects ADD COLUMN client_name text;' };
       }
       return { error: error.message };
     }
@@ -123,9 +125,10 @@ export async function updateProject(formData: FormData): Promise<ActionResult> {
   }
 }
 
-export async function deleteProject(id: string): Promise<ActionResult> {
+export async function deleteProject(id: string): Promise<{ error: string } | null> {
   try {
     const supabase = await checkAuth();
+    
     const { data: proj } = await supabase.from('projects').select('title').eq('id', id).single();
     const title = proj?.title || 'Unknown Project';
 
@@ -142,7 +145,7 @@ export async function deleteProject(id: string): Promise<ActionResult> {
   }
 }
 
-export async function addService(formData: FormData): Promise<ActionResult> {
+export async function addService(formData: FormData): Promise<{ error: string } | null> {
   try {
     const supabase = await checkAuth();
     
@@ -167,7 +170,7 @@ export async function addService(formData: FormData): Promise<ActionResult> {
   }
 }
 
-export async function updateService(formData: FormData): Promise<ActionResult> {
+export async function updateService(formData: FormData): Promise<{ error: string } | null> {
   try {
     const supabase = await checkAuth();
     
@@ -193,9 +196,10 @@ export async function updateService(formData: FormData): Promise<ActionResult> {
   }
 }
 
-export async function deleteService(id: string): Promise<ActionResult> {
+export async function deleteService(id: string): Promise<{ error: string } | null> {
   try {
     const supabase = await checkAuth();
+    
     const { data: s } = await supabase.from('services').select('title').eq('id', id).single();
     const title = s?.title || 'Unknown Service';
 
@@ -211,7 +215,7 @@ export async function deleteService(id: string): Promise<ActionResult> {
   }
 }
 
-export async function addTestimonial(formData: FormData): Promise<ActionResult> {
+export async function addTestimonial(formData: FormData): Promise<{ error: string } | null> {
   try {
     const supabase = await checkAuth();
     
@@ -234,7 +238,7 @@ export async function addTestimonial(formData: FormData): Promise<ActionResult> 
   }
 }
 
-export async function updateTestimonial(formData: FormData): Promise<ActionResult> {
+export async function updateTestimonial(formData: FormData): Promise<{ error: string } | null> {
   try {
     const supabase = await checkAuth();
     
@@ -258,9 +262,10 @@ export async function updateTestimonial(formData: FormData): Promise<ActionResul
   }
 }
 
-export async function deleteTestimonial(id: string): Promise<ActionResult> {
+export async function deleteTestimonial(id: string): Promise<{ error: string } | null> {
   try {
     const supabase = await checkAuth();
+
     const { data: t } = await supabase.from('testimonials').select('author_name').eq('id', id).single();
     const author = t?.author_name || 'Unknown Entry';
 
@@ -276,7 +281,7 @@ export async function deleteTestimonial(id: string): Promise<ActionResult> {
   }
 }
 
-export async function addCredential(formData: FormData): Promise<ActionResult> {
+export async function addCredential(formData: FormData): Promise<{ error: string } | null> {
   try {
     const supabase = await checkAuth();
 
@@ -299,7 +304,7 @@ export async function addCredential(formData: FormData): Promise<ActionResult> {
   }
 }
 
-export async function updateCredential(formData: FormData): Promise<ActionResult> {
+export async function updateCredential(formData: FormData): Promise<{ error: string } | null> {
   try {
     const supabase = await checkAuth();
 
@@ -323,9 +328,10 @@ export async function updateCredential(formData: FormData): Promise<ActionResult
   }
 }
 
-export async function deleteCredential(id: string): Promise<ActionResult> {
+export async function deleteCredential(id: string): Promise<{ error: string } | null> {
   try {
     const supabase = await checkAuth();
+
     const { data: c } = await supabase.from('credentials').select('title').eq('id', id).single();
     const title = c?.title || 'Unknown Credential';
 
@@ -340,7 +346,7 @@ export async function deleteCredential(id: string): Promise<ActionResult> {
   }
 }
 
-export async function addLink(formData: FormData): Promise<ActionResult> {
+export async function addLink(formData: FormData): Promise<{ error: string } | null> {
   try {
     const supabase = await checkAuth();
 
@@ -359,7 +365,7 @@ export async function addLink(formData: FormData): Promise<ActionResult> {
   }
 }
 
-export async function updateLink(formData: FormData): Promise<ActionResult> {
+export async function updateLink(formData: FormData): Promise<{ error: string } | null> {
   try {
     const supabase = await checkAuth();
 
@@ -379,7 +385,7 @@ export async function updateLink(formData: FormData): Promise<ActionResult> {
   }
 }
 
-export async function deleteLink(id: string): Promise<ActionResult> {
+export async function deleteLink(id: string): Promise<{ error: string } | null> {
   try {
     const supabase = await checkAuth();
     const { error } = await supabase.from('links').delete().eq('id', id);
@@ -393,7 +399,7 @@ export async function deleteLink(id: string): Promise<ActionResult> {
   }
 }
 
-export async function updateProfile(formData: FormData): Promise<ActionResult> {
+export async function updateProfile(formData: FormData): Promise<{ error: string } | null> {
   try {
     const supabase = await checkAuth();
     
@@ -431,7 +437,7 @@ export async function updateProfile(formData: FormData): Promise<ActionResult> {
       const { error } = await supabase.from('profile').update(profileData).eq('id', existing.id);
       if (error) {
         if (error.message.includes('schema cache') || error.message.includes('column') || error.code === 'PGRST204') {
-          return { error: 'Database column "email" is missing. Please run: ALTER TABLE public.profile ADD COLUMN email text;' };
+          return { error: 'Database column "email" is missing. Please run this SQL in your Supabase Dashboard: ALTER TABLE public.profile ADD COLUMN email text;' };
         }
         return { error: error.message };
       }
@@ -439,7 +445,7 @@ export async function updateProfile(formData: FormData): Promise<ActionResult> {
       const { error } = await supabase.from('profile').insert(profileData);
       if (error) {
         if (error.message.includes('schema cache') || error.message.includes('column') || error.code === 'PGRST204') {
-          return { error: 'Database column "email" is missing. Please run: ALTER TABLE public.profile ADD COLUMN email text;' };
+          return { error: 'Database column "email" is missing. Please run this SQL in your Supabase Dashboard: ALTER TABLE public.profile ADD COLUMN email text;' };
         }
         return { error: error.message };
       }
@@ -456,7 +462,7 @@ export async function updateProfile(formData: FormData): Promise<ActionResult> {
   }
 }
 
-export async function updateAvailability(status: string): Promise<ActionResult> {
+export async function updateAvailability(status: string): Promise<{ error: string } | null> {
   try {
     const supabase = await checkAuth();
     const { data: existing } = await supabase.from('profile').select('id').limit(1).single();

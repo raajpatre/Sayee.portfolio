@@ -87,14 +87,14 @@ export default function ProfileForm({ initialProfile }: { initialProfile: any })
         formData.append('availability_status', initialProfile?.availability_status || 'Open for Work');
         formData.append('avatar', initialProfile?.avatar || '');
         const result = await updateProfile(formData);
-        if (result && 'error' in result) {
+        if (result?.error) {
           setErrorMsg(result.error);
           return;
         }
         setSuccessMsg('Profile updated successfully!');
         setTimeout(() => setSuccessMsg(''), 3000);
       } catch (err: any) {
-        setErrorMsg(err?.message || 'An unexpected error occurred');
+        setErrorMsg(err.message);
       }
     });
   }

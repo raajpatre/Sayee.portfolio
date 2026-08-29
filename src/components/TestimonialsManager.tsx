@@ -82,13 +82,13 @@ export default function TestimonialsManager({ initialTestimonials }: { initialTe
     startTransition(async () => {
       try {
         const result = await deleteTestimonial(id);
-        if (result && 'error' in result) {
+        if (result?.error) {
           alert(result.error);
           return;
         }
         setTestimonials((prev) => prev.filter((t) => t.id !== id));
       } catch (err: any) {
-        alert(err?.message || 'An unexpected error occurred');
+        alert(err.message);
       }
     });
   }

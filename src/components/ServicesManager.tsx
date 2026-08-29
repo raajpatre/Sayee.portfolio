@@ -47,15 +47,21 @@ export default function ServicesManager({ initialServices }: { initialServices: 
       try {
         if (modal.mode === 'add') {
           const result = await addService(formData);
-          if (result && 'error' in result) { setError(result.error); return; }
+          if (result?.error) {
+            setError(result.error);
+            return;
+          }
         } else if (modal.mode === 'edit') {
           const result = await updateService(formData);
-          if (result && 'error' in result) { setError(result.error); return; }
+          if (result?.error) {
+            setError(result.error);
+            return;
+          }
         }
         closeModal();
         window.location.reload();
       } catch (err: any) {
-        setError(err?.message || 'An unexpected error occurred');
+        setError(err.message);
       }
     });
   }
@@ -65,13 +71,13 @@ export default function ServicesManager({ initialServices }: { initialServices: 
     startTransition(async () => {
       try {
         const result = await deleteService(id);
-        if (result && 'error' in result) {
+        if (result?.error) {
           alert(result.error);
           return;
         }
         setServices((prev) => prev.filter((s) => s.id !== id));
       } catch (err: any) {
-        alert(err?.message || 'An unexpected error occurred');
+        alert(err.message);
       }
     });
   }

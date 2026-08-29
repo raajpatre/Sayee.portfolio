@@ -52,13 +52,13 @@ export default function ProjectsManager({ initialProjects }: { initialProjects: 
     startTransition(async () => {
       try {
         const result = await deleteProject(id);
-        if (result && 'error' in result) {
+        if (result?.error) {
           alert(result.error);
           return;
         }
         setProjects(prev => prev.filter(p => p.id !== id));
       } catch (err: any) {
-        alert(err?.message || 'An unexpected error occurred');
+        alert(err.message);
       }
     });
   }

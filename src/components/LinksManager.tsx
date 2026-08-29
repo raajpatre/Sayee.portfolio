@@ -43,15 +43,21 @@ export default function LinksManager({ initialLinks }: { initialLinks: BlogLink[
       try {
         if (modal.mode === 'add') {
           const result = await addLink(formData);
-          if (result && 'error' in result) { setError(result.error); return; }
+          if (result?.error) {
+            setError(result.error);
+            return;
+          }
         } else if (modal.mode === 'edit') {
           const result = await updateLink(formData);
-          if (result && 'error' in result) { setError(result.error); return; }
+          if (result?.error) {
+            setError(result.error);
+            return;
+          }
         }
         closeModal();
         window.location.reload();
       } catch (err: any) {
-        setError(err?.message || 'An unexpected error occurred');
+        setError(err.message);
       }
     });
   }
@@ -61,13 +67,13 @@ export default function LinksManager({ initialLinks }: { initialLinks: BlogLink[
     startTransition(async () => {
       try {
         const result = await deleteLink(id);
-        if (result && 'error' in result) {
+        if (result?.error) {
           alert(result.error);
           return;
         }
         setLinks((prev) => prev.filter((l) => l.id !== id));
       } catch (err: any) {
-        alert(err?.message || 'An unexpected error occurred');
+        alert(err.message);
       }
     });
   }

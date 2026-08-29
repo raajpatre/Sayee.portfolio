@@ -69,15 +69,21 @@ export default function CredentialsManager({ initialCredentials }: { initialCred
 
         if (modal.mode === 'add') {
           const result = await addCredential(formData);
-          if (result && 'error' in result) { setError(result.error); return; }
+          if (result?.error) {
+            setError(result.error);
+            return;
+          }
         } else if (modal.mode === 'edit') {
           const result = await updateCredential(formData);
-          if (result && 'error' in result) { setError(result.error); return; }
+          if (result?.error) {
+            setError(result.error);
+            return;
+          }
         }
         closeModal();
         window.location.reload();
       } catch (err: any) {
-        setError(err?.message || 'An unexpected error occurred');
+        setError(err.message);
       }
     });
   }
@@ -86,7 +92,11 @@ export default function CredentialsManager({ initialCredentials }: { initialCred
     if (!confirm('Delete this credential? This cannot be undone.')) return;
     startTransition(async () => {
       try {
-        await deleteCredential(id);
+        const result = await deleteCredential(id);
+        if (result?.error) {
+          alert(result.error);
+          return;
+        }
         setCredentials((prev) => prev.filter((c) => c.id !== id));
       } catch (err: any) {
         alert(err.message);

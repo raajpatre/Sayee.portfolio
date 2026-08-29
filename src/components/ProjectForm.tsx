@@ -66,25 +66,17 @@ export default function ProjectForm({ initialData, onBack }: { initialData?: any
       if (initialData?.id) {
         formData.set('id', initialData.id);
         const result = await updateProject(formData);
-        if (result && 'error' in result) {
-          setError(result.error);
-          setLoading(false);
-          return;
-        }
+        if (result?.error) { setError(result.error); setLoading(false); return; }
         alert('Project updated successfully!');
       } else {
         const result = await addProject(formData);
-        if (result && 'error' in result) {
-          setError(result.error);
-          setLoading(false);
-          return;
-        }
+        if (result?.error) { setError(result.error); setLoading(false); return; }
         formRef.current?.reset();
         setPreviews([]);
         alert('Project added successfully!');
       }
     } catch (err: any) {
-      setError(err?.message || 'An unexpected error occurred');
+      setError(err.message);
     } finally {
       setLoading(false);
     }

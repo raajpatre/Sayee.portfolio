@@ -14,9 +14,10 @@ export default function AvailabilityToggle({ initialStatus }: { initialStatus: s
     startTransition(async () => {
       try {
         const result = await updateAvailability(nextStatus ? 'open' : 'working');
-        if (result && 'error' in result) {
+        if (result?.error) {
           setIsOpenForWork(!nextStatus);
-          console.error(result.error);
+          alert(result.error);
+          return;
         }
       } catch (err) {
         // Revert on error
