@@ -41,6 +41,9 @@ export const metadata: Metadata = {
     description: "A loud, bold, and impactful design portfolio by Sayee Kinjavdekar.",
     images: ["/sayee-home-bg.png"],
   },
+  icons: {
+    icon: "/icon.png",
+  },
 };
 
 export default function RootLayout({
